@@ -1,0 +1,9 @@
+# Allow all user agents access
+User-agent: *
+Allow: /
+
+# Disallow access to specific paths if needed (e.g., admin areas)
+# Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://cgblog.in/sitemap.xml
