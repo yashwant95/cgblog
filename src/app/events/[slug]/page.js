@@ -56,6 +56,33 @@ export default function EventDetailPage({ params }) {
     day: 'numeric' 
   });
 
+    // Define JSON-LD schema for the Event
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        name: event.title,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: {
+            '@type': 'Place',
+            name: event.location,
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: event.location.split(',')[0].trim(), // Extract locality
+                addressRegion: event.location.split(',').length > 1 ? event.location.split(',')[1].trim() : "" // Extract region or default to empty
+            }
+        },
+        description: event.excerpt,
+        image: [event.image],
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        organizer: {
+            '@type': 'Organization',
+            name: event.organizer
+        },
+        url: `https://cgblog.in/events/${event.slug}`, // Replace with your actual event URL
+    };
+
+
   return (
     <main className="bg-gradient-to-b from-purple-50 to-white">
       {/* Hero Section */}
@@ -70,6 +97,11 @@ export default function EventDetailPage({ params }) {
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 via-purple-800/50 to-transparent"></div>
+            {/* Add JSON-LD structured data script */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
           <div className="max-w-5xl mx-auto">

@@ -1,5 +1,7 @@
 "use client"
+import Head from 'next/head';
 import Image from 'next/image';
+import Script from 'next/script';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import NewsletterSection from './NewsletterSection';
@@ -122,6 +124,60 @@ const wildlifeSanctuaries = [
 export default function Home() {
   return (
     <div className="bg-gradient-to-br from-green-50 via-blue-50 to-yellow-100 min-h-screen w-full">
+        <Head>
+        <title>Chhattisgarh Tourism Guide | Explore CG Attractions, Food & Events - CG Blog</title>
+        <meta name="description" content="Discover Chhattisgarh with our comprehensive travel guide. Explore top attractions, local cuisine, upcoming events, and authentic reviews. Your ultimate CG tourism resource." />
+        <meta name="keywords" content="Chhattisgarh tourism, CG travel guide, Chitrakote Falls, Danteshwari Temple, Bastar Dussehra, Chhattisgarh food, tribal culture, places to visit in CG, events in Chhattisgarh, reviews in Chhattisgarh" />
+      </Head>
+      <Script
+        id="structured-data-home"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "TravelAgency",
+            "name": "CG Blog - Chhattisgarh Explorer",
+            "url": "https://cgblog.in",
+            "description": "Your comprehensive guide to Chhattisgarh tourism, culture, and travel. Discover the best attractions, food, events, and reviews.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Raipur",
+              "addressRegion": "Chhattisgarh",
+              "addressCountry": "India"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "21.2787",
+              "longitude": "81.8661"
+            },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "00:00",
+              "closes": "23:59"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+91-XXXXXXXXXX",
+              "contactType": "customer service",
+              "areaServed": "IN-CG",
+              "availableLanguage": "English"
+            },
+            "sameAs": [
+                "https://www.facebook.com/yourpage",
+                "https://twitter.com/yourhandle",
+                "https://www.instagram.com/yourprofile"]
+          }),
+        }}
+      />
       {/* Hero Section */}
       <div className="h-screen flex items-center justify-center bg-cover bg-center relative" style={{ backgroundImage: "url('/hero-bg.png')" }}>
         <div className="absolute inset-0 bg-black opacity-40"></div>

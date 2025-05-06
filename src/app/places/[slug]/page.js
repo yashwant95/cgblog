@@ -8,15 +8,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/pl
 // Helper function to fetch all places
 async function fetchAllPlaces() {
   try {
-    const response = await fetch(API_URL, { 
+    const response = await fetch(API_URL, {
       next: { revalidate: 60 },
       cache: 'no-store' // Ensure we get fresh data
     });
-    
+
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
     }
-    
+
     const places = await response.json();
     return places.map(place => ({
       id: place._id,
@@ -88,14 +88,54 @@ export default async function PlaceDetailPage({ params }) {
   }
 
   // Format date for display
-  const formattedDate = new Date(place.date).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = new Date(place.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
+
+  // Generate structured data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    "name": place.title,
+    "description": place.excerpt,
+    "image": place.image,
+    "address": {
+      "@type": "PostalAddress",
+      "name": place.location // Assuming location field can be used as address name
+      // Add more address properties if available (e.g., streetAddress, addressLocality, addressRegion)
+    },
+    "geo": {
+        "@type": "GeoCoordinates",
+        // Replace with actual latitude and longitude if available in place object
+        "latitude": 0,
+        "longitude": 0
+    },
+    "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "opens": place.visitingHours.split(' to ')[0].split(' ')[0], // Extract opening time
+        "closes": place.visitingHours.split(' to ')[1].split(' ')[0]  // Extract closing time
+    }
+    // Add more properties like aggregateRating, review if available
+  };
+
 
   return (
     <main className="bg-gradient-to-b from-blue-50 to-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Hero Section */}
       <div className="relative w-full h-[60vh] overflow-hidden">
         <div className="absolute inset-0">
@@ -157,7 +197,7 @@ export default async function PlaceDetailPage({ params }) {
               place.sections.map((section, index) => (
                 <div key={index} className="mb-8">
                   <h2 className="text-2xl font-bold text-blue-700 mb-4">{section.title}</h2>
-                  <div 
+                  <div
                     className="prose prose-lg max-w-none prose-headings:text-blue-700 prose-a:text-blue-600 hover:prose-a:text-blue-800 prose-li:marker:text-blue-400 prose-img:rounded-xl prose-img:shadow-lg"
                     dangerouslySetInnerHTML={{ __html: section.description }}
                   />
@@ -165,7 +205,7 @@ export default async function PlaceDetailPage({ params }) {
               ))
             ) : (
               // Legacy format with single description
-              <div 
+              <div
                 className="prose prose-lg max-w-none prose-headings:text-blue-700 prose-a:text-blue-600 hover:prose-a:text-blue-800 prose-li:marker:text-blue-400 prose-img:rounded-xl prose-img:shadow-lg"
                 dangerouslySetInnerHTML={{ __html: place.content }}
               />
@@ -258,8 +298,8 @@ export default async function PlaceDetailPage({ params }) {
 
           {/* Back Link with Animation */}
           <div className="mt-12 text-center">
-            <Link 
-              href="/places" 
+            <Link
+              href="/places"
               className="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition transform hover:-translate-y-1 shadow-lg text-lg font-semibold"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

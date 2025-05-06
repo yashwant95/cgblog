@@ -27,6 +27,31 @@ export const metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Upcoming Events & Festivals in Chhattisgarh",
+  "description": "Discover the latest events, festivals, and cultural celebrations happening across Chhattisgarh. Find dates, locations, and details for Bastar Dussehra, Rajim Kumbh, Champaran Mela, Madai Festival, and more.",
+  "url": "https://cgblog.in/events",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+        // You'd dynamically add the events here
+        // Example:
+        // {
+        //   "@type": "Event",
+        //   "name": "Bastar Dussehra Festival",
+        //   "startDate": "2024-10-15",
+        //   "location": { "@type": "Place", "name": "Jagdalpur" },
+        //   "url": "https://cgblog.in/events/bastar-dussehra"
+        // }
+    ]
+  }
+};
+
 export default function EventsPage() {
-  return <EventsListClient />;
+  return (<>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <EventsListClient />
+  </>);
 }

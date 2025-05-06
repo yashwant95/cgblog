@@ -50,8 +50,37 @@ export default function ReviewDetailPage({ params }) {
     day: 'numeric' 
   });
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "author": {
+      "@type": "Person",
+      "name": review.author
+    },
+    "datePublished": review.date,
+    "reviewBody": review.content.replace(/<[^>]*>/g, ''), // Remove HTML tags for reviewBody
+    "name": review.title,
+    "itemReviewed": {
+      "@type": "CreativeWork", // Or a more specific type like TouristAttraction, Event, FoodEstablishment
+      "name": review.itemReviewed // Assuming 'itemReviewed' property exists in review data
+      // You might need to add more properties like URL or sameAs if available
+    },
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": review.rating,
+      "bestRating": "5" // Assuming a 5-star rating system
+    },
+    "image": review.image
+  };
+
+
   return (
     <main className="bg-gradient-to-b from-yellow-50 to-white">
+      {/* Add JSON-LD structured data */}
+      <script 
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Hero Section */}
       <div className="relative w-full h-[60vh] overflow-hidden">
         <div className="absolute inset-0">
@@ -143,7 +172,7 @@ export default function ReviewDetailPage({ params }) {
                   </ul>
                 </div>
                 <div className="w-full md:w-1/2">
-                  <h4 className="text-lg font-semibold text-yellow-800 mb-4">Areas for Improvement</h4>
+                  <h4 className="text-lg font-semibold text-yellow-800 mb-4}>Areas for Improvement</h4>
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">

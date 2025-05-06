@@ -50,6 +50,33 @@ export default function FoodDetailPage({ params }) {
     day: 'numeric' 
   });
 
+    // Define JSON-LD schema for Article
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `https://cgblog.in/food/${food.slug}`
+      },
+      "headline": food.title,
+      "description": food.excerpt,
+      "image": {
+        "@type": "ImageObject",
+        "url": food.image,
+        "width": 1200,
+        "height": 630,
+        "alt": food.title
+      },
+      "author": {
+        "@type": "Person",
+        "name": food.author
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "CG Blog"
+      },
+      "datePublished": food.date
+    };
   return (
     <main className="bg-gradient-to-b from-green-50 to-white">
       {/* Hero Section */}
@@ -63,6 +90,11 @@ export default function FoodDetailPage({ params }) {
             priority
             sizes="100vw"
           />
+                  {/* Add JSON-LD structured data script */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
           <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 via-green-800/50 to-transparent"></div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
