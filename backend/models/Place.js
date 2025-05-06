@@ -5,6 +5,12 @@ const placeSchema = new mongoose.Schema({
   description: String,
   location: String,
   image: String,
+  sections: [
+    {
+      title: String,
+      description: String
+    }
+  ],
   createdAt: { type: Date, default: Date.now }
 });
 
