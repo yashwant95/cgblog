@@ -172,7 +172,7 @@ export default function ReviewDetailPage({ params }) {
                   </ul>
                 </div>
                 <div className="w-full md:w-1/2">
-                  <h4 className="text-lg font-semibold text-yellow-800 mb-4}>Areas for Improvement</h4>
+                  <h4 className="text-lg font-semibold text-yellow-800 mb-4">Areas for Improvement</h4>
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">

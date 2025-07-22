@@ -1,9 +1,27 @@
-# Allow all user agents access
+# robots.txt for cgblog.in
 User-agent: *
 Allow: /
+Disallow: /private/
+Disallow: /admin/
+Disallow: /*?*  # Block query parameters
 
-# Disallow access to specific paths if needed (e.g., admin areas)
-# Disallow: /admin/
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Yandexbot
+Allow: /
+Crawl-delay: 2
+
+# Allow product images to be used in Google Shopping
+User-agent: Googlebot-Image
+Allow: /
 
 # Sitemap location
 Sitemap: https://cgblog.in/sitemap.xml
+Sitemap: https://cgblog.in/sitemapindex.xml

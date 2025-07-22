@@ -2,9 +2,7 @@
 const nextConfig = {
   images: {
     domains: [
-      'www.cgtourism.choice.gov.in',
-      'cgtourism.choice.gov.in',
-      'localhost'
+      'cgblog.in',
     ],
     remotePatterns: [
       {

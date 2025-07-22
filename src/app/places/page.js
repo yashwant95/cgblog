@@ -1,5 +1,10 @@
 import PlacesListClient from './PlacesListClient';
 
+export const viewport = {
+  themeColor: '#4F46E5',
+  colorScheme: 'light dark',
+};
+
 const metadata = {
   title: "Tourist Places in Chhattisgarh: Waterfalls, Temples, Wildlife | CG Blog",
   description: "Explore the best tourist places in Chhattisgarh. Discover stunning waterfalls like Chitrakote, ancient temples like Danteshwari and Bhoramdeo, wildlife sanctuaries like Barnawapara, and hidden gems. Your complete guide to CG tourism.",

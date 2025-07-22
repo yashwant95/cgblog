@@ -1,10 +1,15 @@
 "use client"
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Script from 'next/script';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import NewsletterSection from './NewsletterSection';
+import FaqSection from './components/FaqSection';
+import OptimizedImage from './components/OptimizedImage';
+import { generateOrganizationSchema } from './utils/schemaGenerators';
+import { PlacesApi } from './coreApi/PlacesApi';
 
 // Featured reviews data
 const featuredReviews = [
@@ -122,6 +127,35 @@ const wildlifeSanctuaries = [
 ];
 
 export default function Home() {
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const fetchPlaces = async () => {
+      try {
+        const data = await PlacesApi.getAllPlaces();
+        setPlaces(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchPlaces();
+  }, []);
+
+  // Generate organization schema
+  const organizationSchema = generateOrganizationSchema();
+  
+  // Don't render anything until after hydration
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <div className="bg-gradient-to-br from-green-50 via-blue-50 to-yellow-100 min-h-screen w-full">
         <Head>
@@ -133,55 +167,13 @@ export default function Home() {
         id="structured-data-home"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "TravelAgency",
-            "name": "CG Blog - Chhattisgarh Explorer",
-            "url": "https://cgblog.in",
-            "description": "Your comprehensive guide to Chhattisgarh tourism, culture, and travel. Discover the best attractions, food, events, and reviews.",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Raipur",
-              "addressRegion": "Chhattisgarh",
-              "addressCountry": "India"
-            },
-            "geo": {
-              "@type": "GeoCoordinates",
-              "latitude": "21.2787",
-              "longitude": "81.8661"
-            },
-            "openingHoursSpecification": {
-              "@type": "OpeningHoursSpecification",
-              "dayOfWeek": [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday"
-              ],
-              "opens": "00:00",
-              "closes": "23:59"
-            },
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "telephone": "+91-XXXXXXXXXX",
-              "contactType": "customer service",
-              "areaServed": "IN-CG",
-              "availableLanguage": "English"
-            },
-            "sameAs": [
-                "https://www.facebook.com/yourpage",
-                "https://twitter.com/yourhandle",
-                "https://www.instagram.com/yourprofile"]
-          }),
+          __html: JSON.stringify(organizationSchema),
         }}
       />
-      {/* Hero Section */}
+      {/* Hero Section - Full width */}
       <div className="h-screen flex items-center justify-center bg-cover bg-center relative" style={{ backgroundImage: "url('/hero-bg.png')" }}>
         <div className="absolute inset-0 bg-black opacity-40"></div>
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="w-full px-4 text-center relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">Chhattisgarh Explorer</h1>
           <p className="text-xl md:text-2xl text-white mb-8 drop-shadow-md">Your guide to the best places, food, events & authentic reviews</p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -207,13 +199,13 @@ export default function Home() {
         </p>
       </motion.section>
 
-      {/* Featured Reviews Section */}
-      <section className="py-16 bg-yellow-50">
-        <div className="container mx-auto px-4">
+      {/* Featured Reviews Section - Full width */}
+      <section className="py-16 bg-yellow-50 w-full">
+        <div className="w-full px-4 md:px-8 lg:px-16">
           <h2 className="text-3xl font-bold text-center mb-4 text-yellow-800">Featured Reviews</h2>
           <p className="text-center text-gray-600 mb-12">Authentic experiences shared by our community</p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {featuredReviews.map((review, index) => (
               <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
                 <div className="relative h-48 w-full">
@@ -247,13 +239,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Upcoming Events */}
-      <section className="py-16 bg-purple-50">
-        <div className="container mx-auto px-4">
+      {/* Upcoming Events - Full width */}
+      <section className="py-16 bg-purple-50 w-full">
+        <div className="w-full px-4 md:px-8 lg:px-16">
           <h2 className="text-3xl font-bold text-center mb-4 text-purple-800">Upcoming Events</h2>
           <p className="text-center text-gray-600 mb-12">Don&apos;t miss these exciting cultural celebrations</p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {upcomingEvents.map((event, index) => (
               <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
                 <div className="relative h-48 w-full">
@@ -286,44 +278,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Destinations Section */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.2 } } }}
-        className="max-w-6xl mx-auto my-12"
-      >
-        <h2 className="text-3xl font-bold text-green-800 mb-8 text-center">Top Destinations</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {destinations.map((dest, i) => (
-            <motion.div
-              key={dest.name}
-              whileHover={{ scale: 1.05, boxShadow: "0 8px 32px rgba(34,197,94,0.2)" }}
-              className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center"
-            >
-              <div className="w-full h-48 relative mb-4">
-                <Image
-                  src={dest.img}
-                  alt={dest.name}
-                  className="object-cover rounded-lg"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 300px"
-                  priority
-                />
-              </div>
-              <h3 className="text-xl font-semibold text-green-700 mb-2">{dest.name}</h3>
-              <p className="text-gray-600 text-center">{dest.desc}</p>
-            </motion.div>
-          ))}
+      {/* Destinations Section - Full width */}
+      <section className="py-16 bg-white w-full">
+        <div className="w-full px-4 md:px-8 lg:px-16">
+          <h2 className="text-3xl font-bold text-center mb-12">Top Destinations in Chhattisgarh</h2>
+          {loading ? (
+            <div className="text-center">
+              <p className="text-gray-600">Loading destinations...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-600">
+              <p>Error: {error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {places.map((place) => (
+                <motion.div
+                  key={place._id}
+                  whileHover={{ y: -10 }}
+                  className="bg-white rounded-lg shadow-lg overflow-hidden"
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="relative h-64">
+                    <OptimizedImage
+                      src={place.image || '/placeholder.jpg'}
+                      alt={`${place.name} - Chhattisgarh Tourism`}
+                      fill={true}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
+                    <p className="text-gray-600 mb-4">{place.description}</p>
+                    <Link href={`/places/${place._id}`}
+                      className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center"
+                    >
+                      Explore More
+                      <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
-      </motion.section>
+      </section>
 
-      {/* Local Cuisine Section */}
-      <section className="py-16 bg-green-50">
-        <div className="container mx-auto px-4">
+      {/* Local Cuisine Section - Full width */}
+      <section className="py-16 bg-green-50 w-full">
+        <div className="w-full px-4 md:px-8 lg:px-16">
           <h2 className="text-3xl font-bold text-center mb-12 text-green-800">Taste of Chhattisgarh</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {localCuisine.map((item, index) => (
               <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
                 <div className="relative h-48 w-full">
@@ -345,11 +356,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Wildlife Sanctuaries Section */}
-      <section className="py-16 bg-yellow-50">
-        <div className="container mx-auto px-4">
+      {/* Wildlife Sanctuaries Section - Full width */}
+      <section className="py-16 bg-yellow-50 w-full">
+        <div className="w-full px-4 md:px-8 lg:px-16">
           <h2 className="text-3xl font-bold text-center mb-12 text-yellow-800">Explore the Wild</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {wildlifeSanctuaries.map((sanctuary, index) => (
               <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
                 <div className="relative h-48 w-full">
@@ -371,13 +382,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Interactive Map Section */}
-      <section className="py-16 bg-blue-50">
-        <div className="container mx-auto px-4">
+      {/* Interactive Map Section - Full width */}
+      <section className="py-16 bg-blue-50 w-full">
+        <div className="w-full px-4 md:px-8 lg:px-16">
           <h2 className="text-3xl font-bold text-center mb-4 text-blue-800">Explore by Region</h2>
           <p className="text-center text-gray-600 mb-8">Discover different regions of Chhattisgarh</p>
           
-          <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl mx-auto">
             <div className="relative h-[400px] w-full rounded-lg overflow-hidden border-2 border-blue-200">
               <Image
                 src="/cg-map.jpg"
@@ -411,16 +422,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Gallery Section */}
+      {/* Gallery Section - Full width */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 1 }}
-        className="max-w-6xl mx-auto my-12"
+        className="py-16 w-full px-4 md:px-8 lg:px-16"
       >
         <h2 className="text-3xl font-bold text-blue-700 mb-8 text-center">Gallery</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-7xl mx-auto">
           {galleryImages.map((img, idx) => (
             <motion.div
               key={img}
@@ -442,28 +453,21 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Contact Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1 }}
-        className="max-w-2xl mx-auto my-16 bg-green-700 rounded-xl shadow-xl p-8 text-white text-center"
-      >
-        <h2 className="text-2xl font-bold mb-2">Plan Your Visit!</h2>
-        <p className="mb-4">Contact Chhattisgarh Tourism for personalized travel assistance.</p>
-        <a
-          href="mailto:info@chhattisgarhtourism.in"
-          className="inline-block bg-white text-green-700 font-semibold px-6 py-2 rounded-full shadow hover:bg-green-100 transition"
-        >
-          Email Us
-        </a>
-      </motion.section>
-      {/* Newsletter Subscription */}
-      <NewsletterSection />
+      {/* FAQ Section - Full width */}
+      <div className="w-full">
+        <FaqSection />
+      </div>
+
+      {/* Newsletter Section - Full width */}
+      <div className="w-full">
+        <NewsletterSection />
+      </div>
+      
+      {/* Add FAQ Section */}
+   
       
       {/* Enhanced Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      {/* <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
@@ -517,7 +521,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }
