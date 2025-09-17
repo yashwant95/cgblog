@@ -1,12 +1,14 @@
 // API Configuration
 const config = {
   // Base API URL - change this to your backend URL
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api",
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
   
   // Individual API endpoints
   API: {
     PLACES: "/places",
     EVENTS: "/events",
+    FOOD: "/food",
+    REVIEWS: "/reviews",
     HEALTH: "/health"
   },
   
@@ -15,6 +17,8 @@ const config = {
     return {
       PLACES: `${this.API_BASE_URL}/places`,
       EVENTS: `${this.API_BASE_URL}/events`,
+      FOOD: `${this.API_BASE_URL}/food`,
+      REVIEWS: `${this.API_BASE_URL}/reviews`,
       HEALTH: `${this.API_BASE_URL}/health`
     };
   },

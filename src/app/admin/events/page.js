@@ -2,8 +2,8 @@
 import { useEffect, useState, useRef } from "react";
 import config from '../../config';
 
-// Simple Rich Text Editor Component
-function SimpleRichTextEditor({ value, onChange }) {
+// Enhanced Rich Text Editor Component
+function SimpleRichTextEditor({ value, onChange, placeholder = "Enter content..." }) {
   const editorRef = useRef(null);
 
   // Initialize editor content
@@ -27,64 +27,44 @@ function SimpleRichTextEditor({ value, onChange }) {
     editorRef.current.focus();
   };
 
+  const toolbarButtons = [
+    { command: 'bold', icon: 'B', title: 'Bold' },
+    { command: 'italic', icon: 'I', title: 'Italic' },
+    { command: 'underline', icon: 'U', title: 'Underline' },
+    { command: 'insertOrderedList', icon: '1.', title: 'Numbered List' },
+    { command: 'insertUnorderedList', icon: '•', title: 'Bullet List' },
+    { command: 'createLink', icon: '🔗', title: 'Insert Link', special: true }
+  ];
+
   return (
-    <div className="border border-gray-300 rounded overflow-hidden">
-      <div className="bg-gray-100 p-2 border-b border-gray-300 flex flex-wrap gap-1">
-        <button 
-          type="button"
-          onClick={() => formatText('bold')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Bold"
-        >
-          <strong>B</strong>
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('italic')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Italic"
-        >
-          <em>I</em>
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('underline')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Underline"
-        >
-          <u>U</u>
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('insertOrderedList')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Numbered List"
-        >
-          1.
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('insertUnorderedList')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Bullet List"
-        >
-          •
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('createLink', prompt('Enter link URL'))} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Insert Link"
-        >
-          🔗
-        </button>
+    <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 border-b border-gray-200 flex flex-wrap gap-2">
+        {toolbarButtons.map((button, index) => (
+          <button 
+            key={index}
+            type="button"
+            onClick={() => button.special ? formatText(button.command, prompt('Enter link URL')) : formatText(button.command)} 
+            className="px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 font-medium text-sm shadow-sm hover:shadow-md"
+            title={button.title}
+          >
+            {button.icon}
+          </button>
+        ))}
       </div>
       <div
         ref={editorRef}
         contentEditable
-        className="p-3 min-h-[200px] focus:outline-none"
+        className="p-4 min-h-[200px] focus:outline-none text-gray-700 leading-relaxed"
         onInput={handleInput}
         onBlur={handleInput}
+        data-placeholder={placeholder}
+        style={{
+          '&:empty:before': {
+            content: 'attr(data-placeholder)',
+            color: '#9CA3AF',
+            fontStyle: 'italic'
+          }
+        }}
       />
     </div>
   );
@@ -436,39 +416,59 @@ export default function EventsAdmin() {
         </div>
       </div>
       
-      {/* Custom Modal */}
+      {/* Enhanced Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto">
-            <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-semibold">{editingId ? "Edit Event" : "Add Event"}</h3>
-              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 text-2xl leading-none">
-                &times;
-              </button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden animate-slideUp">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6 text-white">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold">{editingId ? "Edit Event" : "Add New Event"}</h3>
+                    <p className="text-purple-100 text-sm">Manage your event information</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={closeModal} 
+                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors duration-200"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div className="p-6 space-y-4">
+
+            {/* Modal Body */}
+            <div className="p-8 space-y-6 max-h-[calc(95vh-200px)] overflow-y-auto custom-scrollbar">
               {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="form-group">
+                  <label className="form-label">Event Title *</label>
                   <input
                     type="text"
                     value={form.title}
                     onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                    placeholder="Event Title"
+                    placeholder="Enter event title"
                     required
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="form-input"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                <div className="form-group">
+                  <label className="form-label">Location *</label>
                   <input
                     type="text"
                     value={form.location}
                     onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                    placeholder="Event Location"
+                    placeholder="Enter event location"
                     required
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="form-input"
                   />
                 </div>
               </div>
@@ -729,10 +729,12 @@ export default function EventsAdmin() {
                 </label>
               </div>
             </div>
-            <div className="p-4 border-t flex justify-end gap-2">
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-8 py-6 flex justify-end gap-4 border-t border-gray-200">
               <button 
                 onClick={closeModal}
-                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+                className="btn btn-secondary"
+                disabled={loading}
               >
                 Cancel
               </button>
@@ -742,9 +744,21 @@ export default function EventsAdmin() {
                   handleModalOk();
                 }}
                 disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                className="btn btn-primary"
               >
-                {loading ? 'Saving...' : editingId ? 'Update' : 'Add'}
+                {loading ? (
+                  <>
+                    <div className="loading-spinner mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {editingId ? 'Update Event' : 'Add Event'}
+                  </>
+                )}
               </button>
             </div>
           </div>

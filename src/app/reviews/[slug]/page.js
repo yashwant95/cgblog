@@ -1,42 +1,61 @@
-import { reviewPosts } from '@/app/data/reviewsData';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ReviewsApi from '../../coreApi/ReviewsApi';
+import config from '../../config';
 
 // Generate metadata dynamically based on the review
 export async function generateMetadata({ params }) {
-  const review = reviewPosts.find(p => p.slug === params.slug);
+  try {
+    const response = await ReviewsApi.getReviewBySlug(params.slug);
+    // Handle the API response structure: { success: true, data: {...} }
+    const review = response.data;
 
-  if (!review) {
+    if (!review) {
+      return {
+        title: 'Review Not Found | CG Blog',
+        description: 'The review you are looking for could not be found.',
+      };
+    }
+
     return {
-      title: 'Review Not Found | Cg blog',
+      title: `${review.title} | CG Blog Reviews`,
+      description: review.excerpt,
+      openGraph: {
+        title: `${review.title} | CG Blog Reviews`,
+        description: review.excerpt,
+        images: [
+          {
+            url: review.image.startsWith('http') ? review.image : `${config.API_BASE_URL.replace('/api', '')}${review.image}`,
+            width: 1200,
+            height: 630,
+            alt: review.title,
+          },
+        ],
+        type: 'article',
+      },
+    };
+  } catch (error) {
+    return {
+      title: 'Review Not Found | CG Blog',
       description: 'The review you are looking for could not be found.',
     };
   }
-
-  return {
-    title: `${review.title} | Cg blog Reviews`,
-    description: review.excerpt,
-    openGraph: {
-      title: `${review.title} | Cg blog Reviews`,
-      description: review.excerpt,
-      images: [
-        {
-          url: review.image,
-          width: 1200,
-          height: 630,
-          alt: review.title,
-        },
-      ],
-      type: 'article',
-    },
-  };
 }
 
 // Define the page component
-export default function ReviewDetailPage({ params }) {
+export default async function ReviewDetailPage({ params }) {
   const { slug } = params;
-  const review = reviewPosts.find(p => p.slug === params.slug);
+  
+  let review;
+  try {
+    const response = await ReviewsApi.getReviewBySlug(slug);
+    // Handle the API response structure: { success: true, data: {...} }
+    review = response.data;
+  } catch (error) {
+    console.error('Error fetching review:', error);
+    notFound();
+  }
 
   // If review is not found, show a 404 page
   if (!review) {
@@ -44,7 +63,7 @@ export default function ReviewDetailPage({ params }) {
   }
 
   // Format date for display
-  const formattedDate = new Date(review.date).toLocaleDateString('en-US', { 
+  const formattedDate = new Date(review.visitDate || review.createdAt).toLocaleDateString('en-US', { 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
@@ -57,20 +76,19 @@ export default function ReviewDetailPage({ params }) {
       "@type": "Person",
       "name": review.author
     },
-    "datePublished": review.date,
+    "datePublished": review.visitDate || review.createdAt,
     "reviewBody": review.content.replace(/<[^>]*>/g, ''), // Remove HTML tags for reviewBody
     "name": review.title,
     "itemReviewed": {
-      "@type": "CreativeWork", // Or a more specific type like TouristAttraction, Event, FoodEstablishment
-      "name": review.itemReviewed // Assuming 'itemReviewed' property exists in review data
-      // You might need to add more properties like URL or sameAs if available
+      "@type": "CreativeWork",
+      "name": review.itemReviewed?.name || review.title
     },
     "reviewRating": {
       "@type": "Rating",
       "ratingValue": review.rating,
-      "bestRating": "5" // Assuming a 5-star rating system
+      "bestRating": "5"
     },
-    "image": review.image
+    "image": review.image.startsWith('http') ? review.image : `${config.API_BASE_URL.replace('/api', '')}${review.image}`
   };
 
 
@@ -85,12 +103,13 @@ export default function ReviewDetailPage({ params }) {
       <div className="relative w-full h-[60vh] overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src={review.image}
+            src={review.image.startsWith('http') ? review.image : `${config.API_BASE_URL.replace('/api', '')}${review.image}`}
             alt={review.title}
             fill
             className="object-cover"
             priority
             sizes="100vw"
+            unoptimized={true}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/80 via-yellow-800/50 to-transparent"></div>
         </div>

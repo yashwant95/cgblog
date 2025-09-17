@@ -2,8 +2,8 @@
 import { useEffect, useState, useRef } from "react";
 import config from '../../config';
 
-// Simple Rich Text Editor Component
-function SimpleRichTextEditor({ value, onChange }) {
+// Enhanced Rich Text Editor Component
+function SimpleRichTextEditor({ value, onChange, placeholder = "Enter content..." }) {
   const editorRef = useRef(null);
 
   // Initialize editor content
@@ -27,64 +27,44 @@ function SimpleRichTextEditor({ value, onChange }) {
     editorRef.current.focus();
   };
 
+  const toolbarButtons = [
+    { command: 'bold', icon: 'B', title: 'Bold' },
+    { command: 'italic', icon: 'I', title: 'Italic' },
+    { command: 'underline', icon: 'U', title: 'Underline' },
+    { command: 'insertOrderedList', icon: '1.', title: 'Numbered List' },
+    { command: 'insertUnorderedList', icon: '•', title: 'Bullet List' },
+    { command: 'createLink', icon: '🔗', title: 'Insert Link', special: true }
+  ];
+
   return (
-    <div className="border border-gray-300 rounded overflow-hidden">
-      <div className="bg-gray-100 p-2 border-b border-gray-300 flex flex-wrap gap-1">
-        <button 
-          type="button"
-          onClick={() => formatText('bold')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Bold"
-        >
-          <strong>B</strong>
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('italic')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Italic"
-        >
-          <em>I</em>
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('underline')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Underline"
-        >
-          <u>U</u>
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('insertOrderedList')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Numbered List"
-        >
-          1.
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('insertUnorderedList')} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Bullet List"
-        >
-          •
-        </button>
-        <button 
-          type="button"
-          onClick={() => formatText('createLink', prompt('Enter link URL'))} 
-          className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-          title="Insert Link"
-        >
-          🔗
-        </button>
+    <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 border-b border-gray-200 flex flex-wrap gap-2">
+        {toolbarButtons.map((button, index) => (
+          <button 
+            key={index}
+            type="button"
+            onClick={() => button.special ? formatText(button.command, prompt('Enter link URL')) : formatText(button.command)} 
+            className="px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 font-medium text-sm shadow-sm hover:shadow-md"
+            title={button.title}
+          >
+            {button.icon}
+          </button>
+        ))}
       </div>
       <div
         ref={editorRef}
         contentEditable
-        className="p-3 min-h-[200px] focus:outline-none"
+        className="p-4 min-h-[200px] focus:outline-none text-gray-700 leading-relaxed"
         onInput={handleInput}
         onBlur={handleInput}
+        data-placeholder={placeholder}
+        style={{
+          '&:empty:before': {
+            content: 'attr(data-placeholder)',
+            color: '#9CA3AF',
+            fontStyle: 'italic'
+          }
+        }}
       />
     </div>
   );
@@ -136,6 +116,7 @@ export default function PlacesAdmin() {
         throw new Error(`Server responded with status: ${res.status}`);
       }
       const data = await res.json();
+      console.log('Fetched places data:', data);
       setPlaces(data);
     } catch (error) {
       console.error('Error fetching places:', error);
@@ -184,7 +165,11 @@ export default function PlacesAdmin() {
       sections: sections
     });
     setSelectedFile(null);
-    setPreviewImage(place.image || null);
+    // Set preview image with proper URL
+    const imageUrl = place.image ? 
+      (place.image.startsWith('http') ? place.image : `${config.API_BASE_URL.replace('/api', '')}${place.image}`) : 
+      null;
+    setPreviewImage(imageUrl);
     setEditingId(place._id);
     setModalOpen(true);
   }
@@ -265,9 +250,12 @@ export default function PlacesAdmin() {
         throw new Error('Failed to process sections data');
       }
       
-      // Add image if selected
+      // Add image if selected, otherwise preserve existing image
       if (selectedFile) {
         formData.append('image', selectedFile);
+      } else if (form.image) {
+        // Preserve existing image URL when no new file is selected
+        formData.append('existingImage', form.image);
       }
       
       // Log the form data for debugging
@@ -377,144 +365,207 @@ export default function PlacesAdmin() {
         </div>
       </div>
       
-      {/* Custom Modal */}
+      {/* Enhanced Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto">
-            <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-semibold">{editingId ? "Edit Place" : "Add Place"}</h3>
-              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 text-2xl leading-none">
-                &times;
-              </button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-slideUp">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold">{editingId ? "Edit Place" : "Add New Place"}</h3>
+                    <p className="text-blue-100 text-sm">Manage your destination information</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={closeModal} 
+                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors duration-200"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Name"
-                  required
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+
+            {/* Modal Body */}
+            <div className="p-8 space-y-6 max-h-[calc(95vh-200px)] overflow-y-auto custom-scrollbar">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="form-group">
+                  <label className="form-label">Place Name *</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="Enter place name"
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Location *</label>
+                  <input
+                    type="text"
+                    value={form.location}
+                    onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                    placeholder="Enter location"
+                    className="form-input"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <input
-                  type="text"
-                  value={form.location}
-                  onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                  placeholder="Location"
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-                <div className="flex flex-col space-y-2">
+              {/* Image Upload */}
+              <div className="form-group">
+                <label className="form-label">Image</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors duration-200">
                   <input
                     type="file"
                     accept="image/*"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="hidden"
+                    id="image-upload"
                   />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Click to upload image</p>
+                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                    </div>
+                  </label>
                   {previewImage && (
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500 mb-1">Preview:</p>
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
                       <img 
                         src={previewImage} 
                         alt="Preview" 
-                        className="w-full max-h-40 object-contain border rounded"
+                        className="w-full max-h-48 object-cover rounded-lg shadow-sm"
                       />
                     </div>
                   )}
                 </div>
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-gray-700">Content Sections</label>
+              {/* Content Sections */}
+              <div className="form-group">
+                <div className="flex justify-between items-center mb-4">
+                  <label className="form-label">Content Sections</label>
                   <button 
                     type="button"
                     onClick={() => setForm(f => ({
                       ...f,
                       sections: [...f.sections, { title: "", description: "" }]
                     }))}
-                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm flex items-center gap-1"
+                    className="btn btn-secondary text-sm"
                   >
-                    <span className="font-bold">+</span> Add Section
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Section
                   </button>
                 </div>
                 
-                {form.sections.map((section, index) => (
-                  <div key={index} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                    <div className="flex justify-between mb-2">
-                      <h4 className="font-medium">Section {index + 1}</h4>
-                      {form.sections.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setForm(f => ({
-                              ...f,
-                              sections: f.sections.filter((_, i) => i !== index)
-                            }));
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                          aria-label="Remove section"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
+                <div className="space-y-4">
+                  {form.sections.map((section, index) => (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="text-lg font-semibold text-gray-800">Section {index + 1}</h4>
+                        {form.sections.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForm(f => ({
+                                ...f,
+                                sections: f.sections.filter((_, i) => i !== index)
+                              }));
+                            }}
+                            className="btn btn-danger text-sm"
+                            aria-label="Remove section"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     
-                    <div className="mb-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                      <input
-                        type="text"
-                        value={section.title}
-                        onChange={e => {
-                          const newSections = [...form.sections];
-                          newSections[index].title = e.target.value;
-                          setForm(f => ({ ...f, sections: newSections }));
-                        }}
-                        placeholder="Section Title"
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      <div className="space-y-4">
+                        <div className="form-group">
+                          <label className="form-label">Section Title</label>
+                          <input
+                            type="text"
+                            value={section.title}
+                            onChange={e => {
+                              const newSections = [...form.sections];
+                              newSections[index].title = e.target.value;
+                              setForm(f => ({ ...f, sections: newSections }));
+                            }}
+                            placeholder="Enter section title"
+                            className="form-input"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label className="form-label">Section Description</label>
+                          <SimpleRichTextEditor
+                            value={section.description}
+                            onChange={(content) => {
+                              const newSections = [...form.sections];
+                              newSections[index].description = content;
+                              setForm(f => ({ ...f, sections: newSections }));
+                            }}
+                            placeholder="Enter section description..."
+                          />
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                      <SimpleRichTextEditor
-                        value={section.description}
-                        onChange={(content) => {
-                          const newSections = [...form.sections];
-                          newSections[index].description = content;
-                          setForm(f => ({ ...f, sections: newSections }));
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="p-4 border-t flex justify-end gap-2">
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-8 py-6 flex justify-end gap-4 border-t border-gray-200">
               <button 
                 onClick={closeModal}
-                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+                className="btn btn-secondary"
+                disabled={loading}
               >
                 Cancel
               </button>
               <button 
                 onClick={() => {
-                  // Reset loading state first to ensure button is clickable
                   resetLoadingState();
-                  // Then call the handler
                   handleModalOk();
                 }}
                 disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                className="btn btn-primary"
               >
-                {loading ? 'Saving...' : editingId ? 'Update' : 'Add'}
+                {loading ? (
+                  <>
+                    <div className="loading-spinner mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {editingId ? 'Update Place' : 'Add Place'}
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -527,7 +578,7 @@ export default function PlacesAdmin() {
             <tr>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-              <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
               <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -554,9 +605,18 @@ export default function PlacesAdmin() {
                     <div className="sm:hidden text-sm text-gray-500 mt-1">{place.location}</div>
                   </td>
                   <td className="hidden sm:table-cell px-6 py-4">{place.location}</td>
-                  <td className="hidden md:table-cell px-6 py-4">
+                  <td className="px-6 py-4">
                     {place.image && (
-                      <img src={place.image} alt={place.name} className="w-16 h-10 object-cover rounded" />
+                      <img 
+                        src={place.image.startsWith('http') ? place.image : `${config.API_BASE_URL.replace('/api', '')}${place.image}`} 
+                        alt={place.name} 
+                        className="w-16 h-10 object-cover rounded" 
+                        onError={(e) => {
+                          console.error('Image failed to load:', e.target.src);
+                          e.target.style.display = 'none';
+                        }}
+                        onLoad={() => console.log('Image loaded successfully:', place.image)}
+                      />
                     )}
                   </td>
                   <td className="hidden lg:table-cell px-6 py-4 max-w-xs">

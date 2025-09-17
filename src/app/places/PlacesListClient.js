@@ -102,9 +102,9 @@ export default function PlacesListClient() {
                         }}
                       />
                     ) : (
-                      // Use Next.js Image for local images
+                      // Use Next.js Image for local images with proper backend URL
                       <Image
-                        src={post.image}
+                        src={`${config.API_BASE_URL.replace('/api', '')}${post.image}`}
                         alt={post.title}
                         fill
                         className="object-cover"

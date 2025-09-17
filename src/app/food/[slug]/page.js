@@ -1,232 +1,389 @@
-import { foodPosts } from '@/app/data/foodData';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import Breadcrumb from '../../components/Breadcrumb';
+import FoodApi from '../../coreApi/FoodApi';
 
-// Generate metadata dynamically based on the food item
+// Helper function to create slug
+const createSlug = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .trim(); // Remove leading/trailing spaces
+};
+
+// Generate static params for build optimization
+export async function generateStaticParams() {
+  try {
+    const response = await FoodApi.getAllFoods({ status: 'published', limit: 100 });
+    const foods = response.success ? response.data : [];
+    
+    return foods.map((food) => ({
+      slug: createSlug(food.name),
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
+}
+
+// Fetch food data
+async function fetchFoodBySlug(slug) {
+  try {
+    const response = await FoodApi.getAllFoods({ status: 'published', limit: 100 });
+    if (!response.success) {
+      return null;
+    }
+    
+    const foods = response.data || [];
+    return foods.find(food => createSlug(food.name) === slug);
+  } catch (error) {
+    console.error('Error fetching food:', error);
+    return null;
+  }
+}
+
+// Generate metadata for SEO
 export async function generateMetadata({ params }) {
-  const food = foodPosts.find(p => p.slug === params.slug);
+  const food = await fetchFoodBySlug(params.slug);
 
   if (!food) {
     return {
-      title: 'Food Item Not Found | Cg blog',
-      description: 'The food item you are looking for could not be found.',
+      title: 'Food Not Found',
     };
   }
 
   return {
-    title: `${food.title} | Cg blog Food`,
-    description: food.excerpt,
+    title: `${food.name} Recipe | Chhattisgarhi Cuisine`,
+    description: food.shortDescription || food.description?.substring(0, 160),
+    keywords: `${food.name}, Chhattisgarhi food, ${food.category}, ${food.cuisine}, recipe, cooking`,
     openGraph: {
-      title: `${food.title} | Cg blog Food`,
-      description: food.excerpt,
+      title: `${food.name} Recipe`,
+      description: food.shortDescription || food.description?.substring(0, 160),
       images: [
         {
-          url: food.image, // Use the food item's image
+          url: food.image,
           width: 1200,
           height: 630,
-          alt: food.title,
+          alt: food.name,
         },
       ],
-      type: 'article',
     },
   };
 }
 
-// Define the page component
-export default function FoodDetailPage({ params }) {
-  const { slug } = params;
-  const food = foodPosts.find(p => p.slug === params.slug);
+// Helper function to get difficulty color
+const getDifficultyColor = (difficulty) => {
+  const colors = {
+    easy: 'bg-green-100 text-green-800',
+    medium: 'bg-yellow-100 text-yellow-800',
+    hard: 'bg-red-100 text-red-800'
+  };
+  return colors[difficulty] || 'bg-gray-100 text-gray-800';
+};
 
-  // If food item is not found, show a 404 page
+// Helper function to get category color
+const getCategoryColor = (category) => {
+  const colors = {
+    breakfast: 'bg-orange-100 text-orange-800',
+    lunch: 'bg-blue-100 text-blue-800',
+    dinner: 'bg-purple-100 text-purple-800',
+    snacks: 'bg-pink-100 text-pink-800',
+    sweets: 'bg-red-100 text-red-800',
+    beverages: 'bg-cyan-100 text-cyan-800',
+    traditional: 'bg-amber-100 text-amber-800',
+    'street-food': 'bg-indigo-100 text-indigo-800'
+  };
+  return colors[category] || 'bg-gray-100 text-gray-800';
+};
+
+export default async function FoodDetailPage({ params }) {
+  const food = await fetchFoodBySlug(params.slug);
+
   if (!food) {
     notFound();
   }
 
-  // Format date for display
-  const formattedDate = new Date(food.date).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Food', href: '/food' },
+    { label: food.name, href: `/food/${params.slug}` },
+  ];
 
-    // Define JSON-LD schema for Article
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": `https://cgblog.in/food/${food.slug}`
-      },
-      "headline": food.title,
-      "description": food.excerpt,
-      "image": {
-        "@type": "ImageObject",
-        "url": food.image,
-        "width": 1200,
-        "height": 630,
-        "alt": food.title
-      },
-      "author": {
-        "@type": "Person",
-        "name": food.author
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "CG Blog"
-      },
-      "datePublished": food.date
-    };
   return (
-    <main className="bg-gradient-to-b from-green-50 to-white">
-      {/* Hero Section */}
-      <div className="relative w-full h-[60vh] overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src={food.image}
-            alt={food.title}
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
-                  {/* Add JSON-LD structured data script */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-          <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 via-green-800/50 to-transparent"></div>
+    <>
+      <Breadcrumb items={breadcrumbItems} />
+      
+      <main className="max-w-7xl mx-auto py-8 px-4">
+        {/* Hero Section */}
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Image */}
+            <div className="relative h-96 lg:h-auto">
+              <Image
+                src={food.image || '/placeholder-food.jpg'}
+                alt={food.name}
+                fill
+                className="object-cover"
+                unoptimized={food.image?.startsWith('http')}
+                priority
+              />
+            </div>
+
+            {/* Content */}
+            <div className="p-8 lg:p-12">
+              <div className="flex flex-wrap gap-3 mb-6">
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getCategoryColor(food.category)}`}>
+                  {food.category}
+                </span>
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getDifficultyColor(food.difficulty)}`}>
+                  {food.difficulty}
+                </span>
+                <span className="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">
+                  {food.cuisine?.replace('-', ' ')}
+                </span>
+              </div>
+
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                {food.name}
+              </h1>
+
+              <p className="text-xl text-gray-600 mb-6 leading-relaxed">
+                {food.shortDescription || food.description}
+              </p>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">{food.prepTime}</div>
+                  <div className="text-sm text-gray-500">Prep Time (min)</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">{food.cookTime}</div>
+                  <div className="text-sm text-gray-500">Cook Time (min)</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">{food.servings}</div>
+                  <div className="text-sm text-gray-500">Servings</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center">
+                    <span className="text-2xl font-bold text-orange-600 mr-1">{food.rating || 0}</span>
+                    <svg className="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-gray-500">Rating</div>
+                </div>
+              </div>
+
+              {/* Dietary Tags */}
+              <div className="flex flex-wrap gap-3">
+                {food.isVegetarian && (
+                  <span className="flex items-center bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    Vegetarian
+                  </span>
+                )}
+                {food.isVegan && (
+                  <span className="flex items-center bg-lime-100 text-lime-800 text-sm px-3 py-1 rounded-full">
+                    <span className="w-2 h-2 bg-lime-500 rounded-full mr-2"></span>
+                    Vegan
+                  </span>
+                )}
+                {food.isGlutenFree && (
+                  <span className="flex items-center bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">
+                    <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                    Gluten-Free
+                  </span>
+                )}
+                {food.isSpicy && (
+                  <span className="flex items-center bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full">
+                    <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                    Spicy (Level {food.spiceLevel}/5)
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
-          <div className="max-w-5xl mx-auto">
-            {food.rating && (
-              <div className="inline-flex items-center bg-yellow-500 text-white text-sm font-semibold px-4 py-1 rounded-full mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                {food.rating} Rating
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Description */}
+            {food.description && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Dish</h2>
+                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                  {food.description}
+                </div>
               </div>
             )}
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 text-white drop-shadow-md">
-              {food.title}
-            </h1>
-            <div className="flex flex-wrap items-center text-sm md:text-base space-x-4 mb-4 text-white/90">
-              <span className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                By {food.author}
-              </span>
-              <span className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Published on {formattedDate}
-              </span>
+
+            {/* Ingredients */}
+            {food.ingredients && food.ingredients.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Ingredients</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {food.ingredients.map((ingredient, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <span className="font-medium text-gray-900">{ingredient.name}</span>
+                      <span className="text-gray-600">
+                        {ingredient.quantity} {ingredient.unit}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Instructions */}
+            {food.instructions && food.instructions.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Instructions</h2>
+                <div className="space-y-6">
+                  {food.instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {instruction.step}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-700 leading-relaxed">
+                          {instruction.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Cultural Information */}
+            {(food.history || food.culturalSignificance) && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Cultural Heritage</h2>
+                <div className="space-y-4">
+                  {food.history && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">History</h3>
+                      <p className="text-gray-700 leading-relaxed">{food.history}</p>
+                    </div>
+                  )}
+                  {food.culturalSignificance && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Cultural Significance</h3>
+                      <p className="text-gray-700 leading-relaxed">{food.culturalSignificance}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            {/* Nutrition */}
+            {food.nutrition && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Nutrition Facts</h3>
+                <div className="space-y-4">
+                  {food.nutrition.calories && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-700">Calories</span>
+                      <span className="font-semibold">{food.nutrition.calories}</span>
+                    </div>
+                  )}
+                  {food.nutrition.protein && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-700">Protein</span>
+                      <span className="font-semibold">{food.nutrition.protein}g</span>
+                    </div>
+                  )}
+                  {food.nutrition.carbs && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-700">Carbs</span>
+                      <span className="font-semibold">{food.nutrition.carbs}g</span>
+                    </div>
+                  )}
+                  {food.nutrition.fat && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-700">Fat</span>
+                      <span className="font-semibold">{food.nutrition.fat}g</span>
+                    </div>
+                  )}
+                  {food.nutrition.fiber && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-700">Fiber</span>
+                      <span className="font-semibold">{food.nutrition.fiber}g</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Additional Info */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Additional Info</h3>
+              <div className="space-y-4">
+                <div>
+                  <span className="text-sm text-gray-500">Origin</span>
+                  <p className="font-medium text-gray-900">{food.origin}</p>
+                </div>
+                {food.season && (
+                  <div>
+                    <span className="text-sm text-gray-500">Best Season</span>
+                    <p className="font-medium text-gray-900">{food.season.replace('-', ' ')}</p>
+                  </div>
+                )}
+                {food.bestTimeToEat && food.bestTimeToEat.length > 0 && (
+                  <div>
+                    <span className="text-sm text-gray-500">Best Time to Eat</span>
+                    <p className="font-medium text-gray-900">{food.bestTimeToEat.join(', ')}</p>
+                  </div>
+                )}
+                {food.priceRange && (
+                  <div>
+                    <span className="text-sm text-gray-500">Price Range</span>
+                    <p className="font-medium text-gray-900">{food.priceRange}</p>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Tags */}
+            {food.tags && food.tags.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {food.tags.map((tag, index) => (
+                    <span key={index} className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Content Section */}
-      <div className="max-w-4xl mx-auto py-12 px-4">
-        <article>
-          {/* Food Excerpt - Highlighted */}
-          <div className="bg-green-100 border-l-4 border-green-500 p-6 rounded-lg mb-10">
-            <p className="text-xl text-green-800 italic font-medium">
-              {food.excerpt}
-            </p>
-          </div>
-
-          {/* Food Content */}
-          <div 
-            className="prose prose-lg max-w-none prose-headings:text-green-700 prose-a:text-green-600 hover:prose-a:text-green-800 prose-li:marker:text-green-400 prose-img:rounded-xl prose-img:shadow-lg"
-            dangerouslySetInnerHTML={{ __html: food.content }}
-          />
-
-          {/* Recipe Card */}
-          <div className="mt-12 bg-white rounded-xl shadow-xl overflow-hidden border border-green-100">
-            <div className="bg-green-600 px-6 py-4">
-              <h3 className="text-xl font-bold text-white">Dish Information</h3>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-start">
-                <div className="bg-green-100 p-2 rounded-full mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-500">PREPARATION TIME</h4>
-                  <p className="text-gray-800">Approximately 30-45 minutes</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="bg-green-100 p-2 rounded-full mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-500">AVAILABILITY</h4>
-                  <p className="text-gray-800">Available at local restaurants and street vendors</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="bg-green-100 p-2 rounded-full mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 12.414a1.998 1.998 0 10-2.827 2.827l4.244 4.243a8 8 0 111.414-1.414z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-500">REGION</h4>
-                  <p className="text-gray-800">Traditional dish from Chhattisgarh</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="bg-green-100 p-2 rounded-full mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-500">SHARE THIS RECIPE</h4>
-                  <div className="flex space-x-2 mt-1">
-                    <a href="#" className="text-blue-600 hover:text-blue-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
-                      </svg>
-                    </a>
-                    <a href="#" className="text-blue-400 hover:text-blue-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                      </svg>
-                    </a>
-                    <a href="#" className="text-red-600 hover:text-red-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0c-6.627 0-12 5.372-12 12 0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" fill-rule="evenodd" clip-rule="evenodd"/>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Back Link with Animation */}
-          <div className="mt-12 text-center">
-            <Link 
-              href="/food" 
-              className="inline-flex items-center bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition transform hover:-translate-y-1 shadow-lg text-lg font-semibold"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to All Food
-            </Link>
-          </div>
-        </article>
-      </div>
-    </main>
+        {/* Back to Food List */}
+        <div className="mt-12 text-center">
+          <Link 
+            href="/food"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 transition-colors font-medium"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to All Foods
+          </Link>
+        </div>
+      </main>
+    </>
   );
 }

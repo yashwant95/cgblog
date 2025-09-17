@@ -152,7 +152,7 @@ export default async function PlaceDetailPage({ params }) {
       <div className="relative w-full h-[60vh] overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src={place.image}
+            src={place.image.startsWith('http') ? place.image : `${config.API_BASE_URL.replace('/api', '')}${place.image}`}
             alt={place.title}
             fill
             className="object-cover"

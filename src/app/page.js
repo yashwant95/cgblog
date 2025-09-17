@@ -10,6 +10,7 @@ import FaqSection from './components/FaqSection';
 import OptimizedImage from './components/OptimizedImage';
 import { generateOrganizationSchema } from './utils/schemaGenerators';
 import { PlacesApi } from './coreApi/PlacesApi';
+import config from './config';
 
 // Function to create URL-friendly slug from place name
 const createSlug = (name) => {
@@ -315,7 +316,7 @@ export default function Home() {
                   <div className="relative h-64">
                     {place.image ? (
                       <Image
-                        src={place.image}
+                        src={place.image.startsWith('http') ? place.image : `${config.API_BASE_URL.replace('/api', '')}${place.image}`}
                         alt={`${place.name} - Chhattisgarh Tourism`}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
@@ -416,19 +417,14 @@ export default function Home() {
           <p className="text-center text-gray-600 mb-8">Discover different regions of Chhattisgarh</p>
           
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl mx-auto">
-            <div className="relative h-[400px] w-full rounded-lg overflow-hidden border-2 border-blue-200">
+            <div className="relative w-full h-96 rounded-lg overflow-hidden border-2 border-blue-200">
               <Image
-                src="/cg-map.jpg"
+                src="/cg-map.png"
                 alt="Chhattisgarh Map"
                 fill
                 sizes="100vw"
-                className="object-contain transition duration-300 ease-in-out"
+                className="object-cover transition duration-300 ease-in-out"
               />
-              
-              {/* This would ideally be an interactive map */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="bg-white/80 p-4 rounded-lg text-gray-700">Interactive map coming soon</p>
-              </div>
             </div>
             
             <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
