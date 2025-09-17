@@ -2,8 +2,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-// API URL for places - use environment variable if available
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/places";
+import config from '../../config';
+
+// API URL for places
+const API_URL = config.ENDPOINTS.PLACES;
+
+// Function to create URL-friendly slug from place name
+const createSlug = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .trim(); // Remove leading/trailing spaces
+};
 
 // Helper function to fetch all places
 async function fetchAllPlaces() {
@@ -20,7 +32,7 @@ async function fetchAllPlaces() {
     const places = await response.json();
     return places.map(place => ({
       id: place._id,
-      slug: place.name.toLowerCase().replace(/\s+/g, '-'),
+      slug: createSlug(place.name),
       title: place.name,
       location: place.location,
       excerpt: place.location || 'Explore this beautiful destination in Chhattisgarh',

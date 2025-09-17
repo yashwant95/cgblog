@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-// API URL for places - use environment variable if available
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/places";
+import config from '../config';
+
+// API URL for places
+const API_URL = config.ENDPOINTS.PLACES;
 
 // Client component containing the interactive parts
 export default function PlacesListClient() {

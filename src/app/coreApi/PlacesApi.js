@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:5001/api';
+import config from '../config';
+
+const BASE_URL = config.API_BASE_URL;
 
 export const PlacesApi = {
   // Get all places

@@ -11,6 +11,16 @@ import OptimizedImage from './components/OptimizedImage';
 import { generateOrganizationSchema } from './utils/schemaGenerators';
 import { PlacesApi } from './coreApi/PlacesApi';
 
+// Function to create URL-friendly slug from place name
+const createSlug = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .trim(); // Remove leading/trailing spaces
+};
+
 // Featured reviews data
 const featuredReviews = [
   {
@@ -303,18 +313,35 @@ export default function Home() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="relative h-64">
-                    <OptimizedImage
-                      src={place.image || '/placeholder.jpg'}
-                      alt={`${place.name} - Chhattisgarh Tourism`}
-                      fill={true}
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover"
-                    />
+                    {place.image ? (
+                      <Image
+                        src={place.image}
+                        alt={`${place.name} - Chhattisgarh Tourism`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover"
+                        unoptimized={true}
+                        onError={(e) => {
+                          console.error('Image failed to load:', place.image);
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No image available</span>
+                      </div>
+                    )}
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
-                    <p className="text-gray-600 mb-4">{place.description}</p>
-                    <Link href={`/places/${place._id}`}
+                    <p className="text-gray-600 mb-4">{place.location}</p>
+                    <p className="text-gray-600 mb-4 text-sm">
+                      {place.sections && place.sections.length > 0 
+                        ? place.sections[0].description.replace(/<[^>]*>/g, '').substring(0, 150) + '...'
+                        : 'Explore this amazing destination in Chhattisgarh'
+                      }
+                    </p>
+                    <Link href={`/places/${createSlug(place.name)}`}
                       className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center"
                     >
                       Explore More

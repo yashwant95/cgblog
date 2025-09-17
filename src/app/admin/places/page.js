@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import config from '../../config';
+
 // Simple Rich Text Editor Component
 function SimpleRichTextEditor({ value, onChange }) {
   const editorRef = useRef(null);
@@ -88,8 +90,8 @@ function SimpleRichTextEditor({ value, onChange }) {
   );
 }
 
-// Make sure we're using the correct API URL
-const API_URL = "http://localhost:5001/api/places";
+// API URL for places
+const API_URL = config.ENDPOINTS.PLACES;
 
 export default function PlacesAdmin() {
   const [places, setPlaces] = useState([]);

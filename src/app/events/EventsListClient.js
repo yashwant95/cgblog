@@ -2,14 +2,43 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { eventsPosts } from "../data/eventsData";
+import { useState, useEffect } from "react";
+import { EventsApi } from "../coreApi/EventsApi";
 
 // This is the client component containing the interactive parts
 export default function EventsListClient() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredEvents = eventsPosts.filter(
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const data = await EventsApi.getAllEvents({ 
+          status: 'upcoming',
+          sortBy: 'startDate',
+          sortOrder: 'asc'
+        });
+        setEvents(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError(err.message);
+        // Fallback to static data if API fails
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  // Filter events based on search term
+  const filteredEvents = events.filter(
     (event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,14 +101,24 @@ export default function EventsListClient() {
 
       {/* Events List */}
       <div className="space-y-12">
-        {filteredEvents.length === 0 ? (
+        {loading ? (
+          <div className="text-center text-gray-500 text-lg">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            Loading events...
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500 text-lg">
+            <p>Error loading events: {error}</p>
+            <p className="text-sm mt-2">Please try again later.</p>
+          </div>
+        ) : filteredEvents.length === 0 ? (
           <div className="text-center text-gray-500 text-lg">
             No events found.
           </div>
         ) : (
           filteredEvents.map((event) => (
             <div
-              key={event.id}
+              key={event._id || event.id}
               className="bg-white shadow-xl rounded-2xl overflow-hidden flex flex-col md:flex-row hover:shadow-2xl transition group"
             >
               <div className="md:w-1/3 h-60 md:h-auto relative">
