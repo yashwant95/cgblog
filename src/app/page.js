@@ -141,6 +141,7 @@ export default function Home() {
       <div 
         className="h-screen flex items-center justify-center bg-cover bg-center relative hero-bg bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
         style={{ 
+          backgroundImage: `url('/optimized/hero-bg.avif')`,
           backgroundImage: `
             image-set(
               url('/optimized/hero-bg.avif') type('image/avif'),
@@ -497,13 +498,13 @@ export default function Home() {
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl mx-auto">
             <div className="relative w-full h-96 rounded-lg overflow-hidden border-2 border-blue-200">
               <Image
-                src="/cg-map.png"
+                src="/optimized/cg-map.webp"
                 alt="Chhattisgarh Map"
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                 className="object-cover transition duration-300 ease-in-out"
                 loading="lazy"
-                quality={80}
+                quality={70}
               />
             </div>
             

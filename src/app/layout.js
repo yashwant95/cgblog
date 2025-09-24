@@ -177,7 +177,10 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="//backend.cgblog.in" />
         
         {/* Preload critical images */}
-        <link rel="preload" as="image" href="/hero-bg.png" />
+        <link rel="preload" as="image" href="/optimized/hero-bg.avif" />
+        <link rel="preload" as="image" href="/optimized/cg-map.webp" />
+        
+        {/* Preload critical CSS - removed as it's causing 404 */}
         
         {/* Critical CSS */}
         <style dangerouslySetInnerHTML={{
@@ -270,7 +273,7 @@ export default function RootLayout({ children }) {
         <meta name="application-name" content="CG Blog" />
         <meta name="msapplication-TileColor" content="#4F46E5" />
         
-        {/* Google Analytics - Optimized Loading */}
+        {/* Google Analytics - Ultra Optimized Loading */}
         <Script
           id="google-analytics-config"
           strategy="lazyOnload"
@@ -284,7 +287,8 @@ export default function RootLayout({ children }) {
                 anonymize_ip: true,
                 cookie_flags: 'SameSite=None;Secure',
                 send_page_view: false,
-                transport_type: 'beacon'
+                transport_type: 'beacon',
+                custom_map: {}
               });
             `
           }}
