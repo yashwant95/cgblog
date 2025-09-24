@@ -4,6 +4,8 @@ import Script from "next/script";
 import "./globals.css";
 import NavBar from "./NavBar";
 import ScrollToTop from "./ScrollToTop";
+import PerformanceOptimizer from "./components/PerformanceOptimizer";
+import PerformanceMonitor from "./components/PerformanceMonitor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -165,14 +167,100 @@ export default function RootLayout({ children }) {
 
         {/* Preconnect to important domains */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.google-analytics.com" />
         <link rel="preconnect" href="https://maps.googleapis.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://backend.cgblog.in" />
         
         {/* DNS prefetch for performance */}
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="//www.google-analytics.com" />
         <link rel="dns-prefetch" href="//maps.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//backend.cgblog.in" />
+        
+        {/* Preload critical images */}
+        <link rel="preload" as="image" href="/hero-bg.png" />
+        
+        {/* Critical CSS */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            /* Critical CSS for above-the-fold content */
+            .hero-section {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              position: relative;
+            }
+            .hero-bg {
+              background-image: url('/hero-bg.png');
+              background-size: cover;
+              background-position: center;
+              background-repeat: no-repeat;
+              background-attachment: fixed;
+            }
+            .hero-content {
+              text-align: center;
+              color: white;
+              z-index: 10;
+              position: relative;
+            }
+            .hero-title {
+              font-size: 3rem;
+              font-weight: 700;
+              margin-bottom: 1rem;
+              text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
+            .hero-subtitle {
+              font-size: 1.5rem;
+              margin-bottom: 2rem;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            }
+            .hero-buttons {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+              gap: 1rem;
+              margin-bottom: 2rem;
+            }
+            .hero-button {
+              background-color: #3b82f6;
+              color: white;
+              font-weight: 700;
+              padding: 0.75rem 1.5rem;
+              border-radius: 9999px;
+              transition: all 0.3s ease;
+              text-decoration: none;
+              display: inline-block;
+            }
+            .hero-button:hover {
+              background-color: #2563eb;
+              transform: scale(1.05);
+              box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            }
+            .loading-spinner {
+              display: inline-block;
+              width: 2rem;
+              height: 2rem;
+              border: 2px solid #f3f3f3;
+              border-top: 2px solid #3498db;
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @media (max-width: 768px) {
+              .hero-title { font-size: 2rem; }
+              .hero-subtitle { font-size: 1.25rem; }
+              .hero-buttons { flex-direction: column; align-items: center; }
+            }
+          `
+        }} />
         
         {/* Web App Manifest */}
         <link rel="manifest" href="/manifest.json" />
@@ -186,19 +274,24 @@ export default function RootLayout({ children }) {
         <meta name="application-name" content="CG Blog" />
         <meta name="msapplication-TileColor" content="#4F46E5" />
         
-        {/* Google Analytics */}
-        <Script id="google-analytics-config">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-278L9G22EN', {
-              page_path: window.location.pathname,
-              anonymize_ip: true,
-              cookie_flags: 'SameSite=None;Secure'
-            });
-          `}
-        </Script>
+        {/* Google Analytics - Optimized Loading */}
+        <Script
+          id="google-analytics-config"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-278L9G22EN', {
+                page_path: window.location.pathname,
+                anonymize_ip: true,
+                cookie_flags: 'SameSite=None;Secure',
+                send_page_view: false
+              });
+            `
+          }}
+        />
         <Script
           strategy="afterInteractive"
           src={`https://www.googletagmanager.com/gtag/js?id=G-278L9G22EN`}
@@ -228,6 +321,8 @@ export default function RootLayout({ children }) {
         </noscript>
         {/* End Google Tag Manager (noscript) */}
         
+        <PerformanceOptimizer />
+        <PerformanceMonitor />
         <NavBar />
         <main className="min-h-[calc(100vh-64px)]">
           {children}

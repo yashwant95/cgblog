@@ -114,7 +114,7 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Admin! 👋</h1>
-            <p className="text-gray-600">Here's what's happening with your Chhattisgarh blog today.</p>
+            <p className="text-gray-600">Here&apos;s what&apos;s happening with your Chhattisgarh blog today.</p>
           </div>
           <div className="hidden md:block">
             <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">

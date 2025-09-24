@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "ANALYZE=true next build",
+    "optimize-images": "node scripts/optimize-images.js",
+    "test-build": "node test-build.js"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",

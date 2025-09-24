@@ -1,16 +1,21 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Script from 'next/script';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import NewsletterSection from './NewsletterSection';
-import FaqSection from './components/FaqSection';
-import OptimizedImage from './components/OptimizedImage';
 import { generateOrganizationSchema } from './utils/schemaGenerators';
 import { PlacesApi } from './coreApi/PlacesApi';
+import { EventsApi } from './coreApi/EventsApi';
+import FoodApi from './coreApi/FoodApi';
+import ReviewsApi from './coreApi/ReviewsApi';
 import config from './config';
+
+// Lazy load non-critical components
+const NewsletterSection = lazy(() => import('./NewsletterSection'));
+const FaqSection = lazy(() => import('./components/FaqSection'));
+const OptimizedImage = lazy(() => import('./components/OptimizedImage'));
 
 // Function to create URL-friendly slug from place name
 const createSlug = (name) => {
@@ -22,58 +27,7 @@ const createSlug = (name) => {
     .trim(); // Remove leading/trailing spaces
 };
 
-// Featured reviews data
-const featuredReviews = [
-  {
-    title: "Magnificent Chitrakote Falls",
-    place: "Chitrakote Falls",
-    rating: 4.8,
-    author: "Travelogue",
-    excerpt: "A breathtaking waterfall that rivals the Niagara in beauty and grandeur.",
-    img: "/chitrakote.jpg"
-  },
-  {
-    title: "Divine Experience at Danteshwari Temple",
-    place: "Danteshwari Temple, Jagdalpur",
-    rating: 4.9,
-    author: "Heritage Explorer",
-    excerpt: "The spiritual energy of this ancient temple is unlike anything I've experienced.",
-    img: "/review-danteshwari.jpg"
-  },
-  {
-    title: "Authentic Tribal Cuisine at Bastar Lounge",
-    place: "Bastar Lounge, Jagdalpur",
-    rating: 4.7,
-    author: "Food Critic",
-    excerpt: "Traditional flavors prepared with modern techniques - absolutely delicious!",
-    img: "/review-bastar-food.jpg"
-  }
-];
-
-// Upcoming events data
-const upcomingEvents = [
-  {
-    title: "Bastar Dussehra Festival",
-    date: "October 2025",
-    location: "Jagdalpur",
-    desc: "Experience the world's longest festival celebrating tribal culture and traditions.",
-    img: "/event-bastar-dussehra.jpg"
-  },
-  {
-    title: "Champaran Mela",
-    date: "May 2025",
-    location: "Champaran, Raipur",
-    desc: "Annual fair featuring local handicrafts, performances, and cuisine.",
-    img: "/event-champaran-mela.jpg"
-  },
-  {
-    title: "Madai Festival",
-    date: "January 2026",
-    location: "Various locations",
-    desc: "A traditional tribal fair celebrating harvest season with dance and music.",
-    img: "/event-madai-festival.jpg"
-  }
-];
+// Hardcoded data for sections that don't have APIs yet
 
 const destinations = [
   {
@@ -101,23 +55,7 @@ const galleryImages = [
   "/gallery4.jpg"
 ];
 
-const localCuisine = [
-  {
-    name: "Chilla",
-    img: "/food-chila.jpg", // Placeholder image path
-    desc: "A savory pancake made from gram flour, a popular breakfast item."
-  },
-  {
-    name: "Faraa",
-    img: "/food-faraa.jpg", // Placeholder image path
-    desc: "Steamed rice dumplings, often served with chutney."
-  },
-  {
-    name: "Muthia",
-    img: "/food-muthia.jpg", // Placeholder image path
-    desc: "Steamed or fried dumplings made from rice batter and spices."
-  }
-];
+// Local cuisine will be fetched from API
 
 const wildlifeSanctuaries = [
   {
@@ -139,24 +77,42 @@ const wildlifeSanctuaries = [
 
 export default function Home() {
   const [places, setPlaces] = useState([]);
+  const [featuredReviews, setFeaturedReviews] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [localCuisine, setLocalCuisine] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const fetchPlaces = async () => {
+    const fetchAllData = async () => {
       try {
-        const data = await PlacesApi.getAllPlaces();
-        setPlaces(data);
-        setLoading(false);
+        setLoading(true);
+        
+        // Fetch all data in parallel
+        const [placesData, reviewsData, eventsData, foodData] = await Promise.all([
+          PlacesApi.getAllPlaces(),
+          ReviewsApi.getAllReviews({ featured: true, limit: 3 }),
+          EventsApi.getUpcomingEvents(3),
+          FoodApi.getFeaturedFoods(3)
+        ]);
+
+        setPlaces(placesData);
+        setFeaturedReviews(reviewsData.data || []);
+        setUpcomingEvents(eventsData.data || eventsData || []);
+        setLocalCuisine(foodData.data || []);
+        
+        setError(null);
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchPlaces();
+    fetchAllData();
   }, []);
 
   // Generate organization schema
@@ -182,7 +138,15 @@ export default function Home() {
         }}
       />
       {/* Hero Section - Full width */}
-      <div className="h-screen flex items-center justify-center bg-cover bg-center relative" style={{ backgroundImage: "url('/hero-bg.png')" }}>
+      <div 
+        className="h-screen flex items-center justify-center bg-cover bg-center relative hero-bg bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
+        style={{ 
+          backgroundImage: "url('/hero-bg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40"></div>
         <div className="w-full px-4 text-center relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">Chhattisgarh Explorer</h1>
@@ -217,29 +181,59 @@ export default function Home() {
           <p className="text-center text-gray-600 mb-12">Authentic experiences shared by our community</p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {featuredReviews.map((review, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                <div className="relative h-48 w-full">
-                  <Image
-                    src={review.img}
-                    alt={review.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition duration-300 ease-in-out hover:opacity-90"
-                  />
-                  <div className="absolute top-0 right-0 bg-yellow-500 text-white font-bold p-2 rounded-bl-lg">
-                    ★ {review.rating}
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+                <p className="mt-4 text-gray-600">Loading reviews...</p>
+              </div>
+            ) : featuredReviews.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500 text-lg py-12">
+                No featured reviews available at the moment.
+              </div>
+            ) : (
+              featuredReviews.map((review, index) => {
+                // For review images, check if they exist in public folder first
+                const isPublicImage = review.image && review.image.startsWith('/') && 
+                  ['/review-adventure.jpg', '/review-bastar-food.jpg', '/review-danteshwari.jpg', '/review-hotels.jpg', '/review-restaurants.jpg'].includes(review.image);
+                
+                const imageUrl = review.image.startsWith('http') 
+                  ? review.image 
+                  : isPublicImage 
+                    ? review.image 
+                    : `${config.API_BASE_URL.replace('/api', '')}${review.image}`;
+                return (
+                <div key={review._id || index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                  <div className="relative h-48 w-full">
+                    <Image
+                      src={imageUrl}
+                      alt={review.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition duration-300 ease-in-out hover:opacity-90"
+                      loading="lazy"
+                      quality={80}
+                      onError={(e) => {
+                        console.error('Image failed to load:', e.target.src);
+                        console.error('Review image path:', review.image);
+                        console.error('Constructed URL:', imageUrl);
+                        e.target.src = '/next.svg'; // Use a fallback that exists
+                      }}
+                    />
+                    <div className="absolute top-0 right-0 bg-yellow-500 text-white font-bold p-2 rounded-bl-lg">
+                      ★ {review.rating}
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2 text-yellow-700">{review.title}</h3>
+                    <p className="text-gray-500 text-sm mb-2">{review.location?.name || review.itemReviewed?.name}</p>
+                    <p className="text-gray-600 mb-4 text-sm italic">✏️ {review.author}</p>
+                    <p className="text-gray-600 text-sm">&ldquo;{review.excerpt}&rdquo;</p>
+                    <Link href={`/reviews/${review.slug}`} className="inline-block mt-4 text-yellow-600 hover:text-yellow-800 hover:underline">Read full review →</Link>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2 text-yellow-700">{review.title}</h3>
-                  <p className="text-gray-500 text-sm mb-2">{review.place}</p>
-                  <p className="text-gray-600 mb-4 text-sm italic">✏️ {review.author}</p>
-                  <p className="text-gray-600 text-sm">&ldquo;{review.excerpt}&rdquo;</p>
-                  <Link href="/reviews" className="inline-block mt-4 text-yellow-600 hover:text-yellow-800 hover:underline">Read full review →</Link>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )}
           </div>
           
           <div className="text-center mt-10">
@@ -257,28 +251,58 @@ export default function Home() {
           <p className="text-center text-gray-600 mb-12">Don&apos;t miss these exciting cultural celebrations</p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {upcomingEvents.map((event, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                <div className="relative h-48 w-full">
-                  <Image
-                    src={event.img}
-                    alt={event.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition duration-300 ease-in-out hover:opacity-90"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="text-white font-bold">{event.date}</p>
-                    <p className="text-white text-sm">{event.location}</p>
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <p className="mt-4 text-gray-600">Loading events...</p>
+              </div>
+            ) : upcomingEvents.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500 text-lg py-12">
+                No upcoming events available at the moment.
+              </div>
+            ) : (
+              upcomingEvents.map((event, index) => {
+                // For event images, check if they exist in public folder first
+                const isPublicImage = event.image && event.image.startsWith('/') && 
+                  ['/event-bastar-dussehra.jpg', '/event-rajim-kumbh.jpg', '/event-sirpur-festival.jpeg', '/event-champaran-mela.jpg', '/event-madai-festival.jpg'].includes(event.image);
+                
+                const imageUrl = event.image.startsWith('http') 
+                  ? event.image 
+                  : isPublicImage 
+                    ? event.image 
+                    : `${config.API_BASE_URL.replace('/api', '')}${event.image}`;
+                return (
+                <div key={event._id || index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                  <div className="relative h-48 w-full">
+                    <Image
+                      src={imageUrl}
+                      alt={event.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition duration-300 ease-in-out hover:opacity-90"
+                      loading="lazy"
+                      quality={80}
+                      onError={(e) => {
+                        console.error('Event image failed to load:', e.target.src);
+                        console.error('Event image path:', event.image);
+                        console.error('Constructed URL:', imageUrl);
+                        e.target.src = '/next.svg'; // Use a fallback that exists
+                      }}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <p className="text-white font-bold">{new Date(event.startDate).toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}</p>
+                      <p className="text-white text-sm">{event.location}</p>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2 text-purple-700">{event.title}</h3>
+                    <p className="text-gray-600 text-sm">{event.description}</p>
+                    <Link href={`/events/${event.slug}`} className="inline-block mt-4 text-purple-600 hover:text-purple-800 hover:underline">View details →</Link>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2 text-purple-700">{event.title}</h3>
-                  <p className="text-gray-600 text-sm">{event.desc}</p>
-                  <Link href="/events" className="inline-block mt-4 text-purple-600 hover:text-purple-800 hover:underline">View details →</Link>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )}
           </div>
           
           <div className="text-center mt-10">
@@ -321,6 +345,8 @@ export default function Home() {
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-cover"
+                        loading="lazy"
+                        quality={80}
                         unoptimized={true}
                         onError={(e) => {
                           console.error('Image failed to load:', place.image);
@@ -363,23 +389,67 @@ export default function Home() {
         <div className="w-full px-4 md:px-8 lg:px-16">
           <h2 className="text-3xl font-bold text-center mb-12 text-green-800">Taste of Chhattisgarh</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {localCuisine.map((item, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                <div className="relative h-48 w-full">
-                  <Image
-                    src={item.img}
-                    alt={item.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition duration-300 ease-in-out hover:opacity-90"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2 text-green-700">{item.name}</h3>
-                  <p className="text-gray-600 text-sm">{item.desc}</p>
-                </div>
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                <p className="mt-4 text-gray-600">Loading food items...</p>
               </div>
-            ))}
+            ) : localCuisine.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500 text-lg py-12">
+                No food items available at the moment.
+              </div>
+            ) : (
+              localCuisine.map((item, index) => {
+                // For food images, check if they exist in public folder first
+                const isPublicImage = item.image && item.image.startsWith('/') && 
+                  ['/food-chila.jpg', '/food-faraa.jpg', '/food-dehrori.jpg', '/food-muthia.jpg'].includes(item.image);
+                
+                const imageUrl = item.image.startsWith('http') 
+                  ? item.image 
+                  : isPublicImage 
+                    ? item.image 
+                    : `${config.API_BASE_URL.replace('/api', '')}${item.image}`;
+                return (
+                <div key={item._id || index} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                  <div className="relative h-48 w-full">
+                    <Image
+                      src={imageUrl}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition duration-300 ease-in-out hover:opacity-90"
+                      loading="lazy"
+                      quality={80}
+                      onError={(e) => {
+                        console.error('Food image failed to load:', e.target.src);
+                        console.error('Food image path:', item.image);
+                        console.error('Constructed URL:', imageUrl);
+                        e.target.src = '/next.svg'; // Use a fallback that exists
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2 text-green-700">{item.name}</h3>
+                    <p className="text-gray-600 text-sm">{item.shortDescription || item.description}</p>
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <span className="flex items-center mr-4">
+                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          {item.rating}
+                        </span>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          {item.cuisine}
+                        </span>
+                      </div>
+                      <Link href={`/food/${item.slug}`} className="text-green-600 hover:text-green-800 hover:underline text-sm font-medium">Learn more →</Link>
+                    </div>
+                  </div>
+                </div>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
@@ -398,6 +468,8 @@ export default function Home() {
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition duration-300 ease-in-out hover:opacity-90"
+                    loading="lazy"
+                    quality={80}
                   />
                 </div>
                 <div className="p-6">
@@ -422,8 +494,10 @@ export default function Home() {
                 src="/cg-map.png"
                 alt="Chhattisgarh Map"
                 fill
-                sizes="100vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                 className="object-cover transition duration-300 ease-in-out"
+                loading="lazy"
+                quality={80}
               />
             </div>
             
@@ -468,7 +542,8 @@ export default function Home() {
                   fill
                   sizes="(max-width: 640px) 50vw, 25vw"
                   className="object-cover"
-                  priority
+                  loading="lazy"
+                  quality={75}
                 />
               </div>
             </motion.div>
@@ -478,12 +553,16 @@ export default function Home() {
 
       {/* FAQ Section - Full width */}
       <div className="w-full">
-        <FaqSection />
+        <Suspense fallback={<div className="text-center py-12"><div className="loading-spinner"></div><p className="mt-4 text-gray-600">Loading FAQ...</p></div>}>
+          <FaqSection />
+        </Suspense>
       </div>
 
       {/* Newsletter Section - Full width */}
       <div className="w-full">
-        <NewsletterSection />
+        <Suspense fallback={<div className="text-center py-12"><div className="loading-spinner"></div><p className="mt-4 text-gray-600">Loading Newsletter...</p></div>}>
+          <NewsletterSection />
+        </Suspense>
       </div>
       
       {/* Add FAQ Section */}

@@ -90,9 +90,11 @@ export default function PlacesListClient() {
                   {post.image ? (
                     post.image.startsWith('http') ? (
                       // Use regular img tag for external images
-                      <img
+                      <Image
                         src={post.image}
                         alt={post.title}
+                        width={400}
+                        height={300}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           // Prevent multiple error requests

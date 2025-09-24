@@ -104,7 +104,7 @@ class EventsApi {
   // Get upcoming events
   static async getUpcomingEvents(limit = 10) {
     try {
-      const response = await fetch(`${API_URL}/upcoming?limit=${limit}`, {
+      const response = await fetch(`${API_URL}?status=upcoming&sortBy=startDate&sortOrder=asc&limit=${limit}`, {
         next: { revalidate: 60 },
         cache: 'no-store'
       });

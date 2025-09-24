@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ReviewsApi from '../../coreApi/ReviewsApi';
 import config from '../../config';
 
@@ -507,7 +508,7 @@ export default function AdminReviewsPage() {
                   />
                   <label htmlFor="image-upload" className="cursor-pointer">
                     {previewImage ? (
-                      <img src={previewImage} alt="Preview" className="mx-auto h-32 w-auto rounded-lg" />
+                      <Image src={previewImage} alt="Preview" width={128} height={128} className="mx-auto h-32 w-auto rounded-lg" />
                     ) : (
                       <div>
                         <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">

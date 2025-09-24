@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import Image from 'next/image';
 import config from '../../config';
 
 // Enhanced Rich Text Editor Component
@@ -11,7 +12,7 @@ function SimpleRichTextEditor({ value, onChange, placeholder = "Enter content...
     if (editorRef.current) {
       editorRef.current.innerHTML = value || '';
     }
-  }, []);
+  }, [value]);
 
   // Handle content changes
   const handleInput = () => {
@@ -542,9 +543,11 @@ export default function EventsAdmin() {
                   {previewImage && (
                     <div className="mt-2">
                       <p className="text-sm text-gray-500 mb-1">Preview:</p>
-                      <img 
+                      <Image 
                         src={previewImage} 
                         alt="Preview" 
+                        width={400}
+                        height={160}
                         className="w-full max-h-40 object-contain border rounded"
                       />
                     </div>

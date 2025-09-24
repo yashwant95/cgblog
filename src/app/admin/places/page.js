@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import Image from 'next/image';
 import config from '../../config';
 
 // Enhanced Rich Text Editor Component
@@ -11,7 +12,7 @@ function SimpleRichTextEditor({ value, onChange, placeholder = "Enter content...
     if (editorRef.current) {
       editorRef.current.innerHTML = value || '';
     }
-  }, []);
+  }, [value]);
 
   // Handle content changes
   const handleInput = () => {
@@ -449,9 +450,11 @@ export default function PlacesAdmin() {
                   {previewImage && (
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
-                      <img 
+                      <Image 
                         src={previewImage} 
                         alt="Preview" 
+                        width={400}
+                        height={192}
                         className="w-full max-h-48 object-cover rounded-lg shadow-sm"
                       />
                     </div>
@@ -607,9 +610,11 @@ export default function PlacesAdmin() {
                   <td className="hidden sm:table-cell px-6 py-4">{place.location}</td>
                   <td className="px-6 py-4">
                     {place.image && (
-                      <img 
+                      <Image 
                         src={place.image.startsWith('http') ? place.image : `${config.API_BASE_URL.replace('/api', '')}${place.image}`} 
                         alt={place.name} 
+                        width={64}
+                        height={40}
                         className="w-16 h-10 object-cover rounded" 
                         onError={(e) => {
                           console.error('Image failed to load:', e.target.src);

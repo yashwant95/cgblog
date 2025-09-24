@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import Image from 'next/image';
 import config from '../../config';
 
 // Enhanced Rich Text Editor Component
@@ -11,7 +12,7 @@ function SimpleRichTextEditor({ value, onChange, placeholder = "Enter content...
     if (editorRef.current) {
       editorRef.current.innerHTML = value || '';
     }
-  }, []);
+  }, [value]);
 
   // Handle content changes
   const handleInput = () => {
@@ -642,9 +643,11 @@ export default function FoodAdmin() {
                   {previewImage && (
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
-                      <img 
+                      <Image 
                         src={previewImage} 
                         alt="Preview" 
+                        width={400}
+                        height={192}
                         className="w-full max-h-48 object-cover rounded-lg shadow-sm"
                       />
                     </div>
@@ -1142,9 +1145,11 @@ export default function FoodAdmin() {
                 <td>
                   <div className="flex items-center">
                     <div className="w-12 h-12 rounded-lg overflow-hidden mr-3">
-                      <img
+                      <Image
                         src={food.image || '/placeholder-food.jpg'}
                         alt={food.name}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
                       />
                     </div>

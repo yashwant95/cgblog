@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import FoodApi from '../coreApi/FoodApi';
@@ -53,16 +53,6 @@ export default function FoodListClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch initial data
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  // Fetch foods when filters change
-  useEffect(() => {
-    fetchFoods();
-  }, [searchTerm, selectedCategory, selectedCuisine, selectedDifficulty, isVegetarian]);
-
   const fetchData = async () => {
     try {
       const [categoriesData, cuisinesData] = await Promise.all([
@@ -72,8 +62,6 @@ export default function FoodListClient() {
       
       setCategories(categoriesData.data || []);
       setCuisines(cuisinesData.data || []);
-      
-      await fetchFoods();
     } catch (err) {
       console.error('Error fetching initial data:', err);
       setError('Failed to load food data. Please try again later.');
@@ -112,6 +100,20 @@ export default function FoodListClient() {
       setLoading(false);
     }
   };
+
+  // Fetch initial data
+  useEffect(() => {
+    const initializeData = async () => {
+      await fetchData();
+      await fetchFoods();
+    };
+    initializeData();
+  }, []);
+
+  // Fetch foods when filters change
+  useEffect(() => {
+    fetchFoods();
+  }, [searchTerm, selectedCategory, selectedCuisine, selectedDifficulty, isVegetarian]);
 
   const clearFilters = () => {
     setSearchTerm('');

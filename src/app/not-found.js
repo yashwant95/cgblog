@@ -20,7 +20,7 @@ export default function NotFound() {
       <h1 className="text-6xl font-bold text-blue-600 mb-6">404</h1>
       <h2 className="text-3xl font-semibold text-gray-800 mb-4">Page Not Found</h2>
       <p className="text-lg text-gray-600 max-w-xl mb-8">
-        Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
+        Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved or deleted.
       </p>
       
       <div className="bg-gray-100 rounded-lg p-6 mb-8 max-w-xl">

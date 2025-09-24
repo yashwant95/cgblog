@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Header({ toggleSidebar, isMobileView }) {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -108,7 +109,7 @@ export default function Header({ toggleSidebar, isMobileView }) {
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Help</a>
                 <hr className="my-1" />
-                <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Back to Website</a>
+                <Link href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Back to Website</Link>
                 <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Sign out</a>
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ReviewsApi from '../coreApi/ReviewsApi';
@@ -15,17 +15,6 @@ export default function ReviewsListClient() {
   const [filterRating, setFilterRating] = useState(0);
   const [filterCategory, setFilterCategory] = useState('');
   const [categories, setCategories] = useState([]);
-
-  // Fetch reviews on component mount
-  useEffect(() => {
-    fetchReviews();
-    fetchCategories();
-  }, []);
-
-  // Fetch reviews when filters change
-  useEffect(() => {
-    fetchReviews();
-  }, [searchTerm, filterRating, filterCategory]);
 
   const fetchReviews = async () => {
     try {
@@ -68,6 +57,20 @@ export default function ReviewsListClient() {
       console.error('Error fetching categories:', err);
     }
   };
+
+  // Fetch reviews on component mount
+  useEffect(() => {
+    const initializeData = async () => {
+      await fetchCategories();
+      await fetchReviews();
+    };
+    initializeData();
+  }, []);
+
+  // Fetch reviews when filters change
+  useEffect(() => {
+    fetchReviews();
+  }, [searchTerm, filterRating, filterCategory]);
 
   const createSlug = (title) => {
     return title
