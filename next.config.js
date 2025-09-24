@@ -1,11 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'cgblog.in',
-      'backend.cgblog.in',
-    ],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cgblog.in',
+      },
+      {
+        protocol: 'https',
+        hostname: 'backend.cgblog.in',
+      },
       {
         protocol: 'https',
         hostname: '**',

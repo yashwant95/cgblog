@@ -33,7 +33,7 @@ export const metadata = {
     default: "Chhattisgarh Explorer - Ultimate Guide to CG Tourism & Culture",
     template: "%s | Chhattisgarh Explorer"
   },
-  description: "Discover Chhattisgarh's best attractions: Chitrakote Falls, Danteshwari Temple, Bastar Dussehra, tribal culture, wildlife sanctuaries, and authentic local cuisine.",
+  description: "Explore Chhattisgarh's hidden gems: Chitrakote Falls, Danteshwari Temple, Bastar Dussehra, tribal culture, wildlife sanctuaries, and authentic local cuisine. Your complete guide to CG tourism, food, events, and reviews.",
   keywords: [
     "Chhattisgarh tourism", "Chitrakote Falls", "Danteshwari Temple", 
     "Bastar Dussehra", "CG travel guide", "Chhattisgarh food",
@@ -168,10 +168,6 @@ export default function RootLayout({ children }) {
         {/* Preconnect to important domains */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
-        <link rel="preconnect" href="https://maps.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://backend.cgblog.in" />
         
         {/* DNS prefetch for performance */}
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
