@@ -141,7 +141,13 @@ export default function Home() {
       <div 
         className="h-screen flex items-center justify-center bg-cover bg-center relative hero-bg bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
         style={{ 
-          backgroundImage: "url('/hero-bg.png')",
+          backgroundImage: `
+            image-set(
+              url('/optimized/hero-bg.avif') type('image/avif'),
+              url('/optimized/hero-bg.webp') type('image/webp'),
+              url('/hero-bg.png') type('image/png')
+            )
+          `,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -211,7 +217,7 @@ export default function Home() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover transition duration-300 ease-in-out hover:opacity-90"
                       loading="lazy"
-                      quality={80}
+                      quality={70}
                       onError={(e) => {
                         console.error('Image failed to load:', e.target.src);
                         console.error('Review image path:', review.image);
@@ -281,7 +287,7 @@ export default function Home() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover transition duration-300 ease-in-out hover:opacity-90"
                       loading="lazy"
-                      quality={80}
+                      quality={70}
                       onError={(e) => {
                         console.error('Event image failed to load:', e.target.src);
                         console.error('Event image path:', event.image);
@@ -346,7 +352,7 @@ export default function Home() {
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-cover"
                         loading="lazy"
-                        quality={80}
+                        quality={70}
                         unoptimized={true}
                         onError={(e) => {
                           console.error('Image failed to load:', place.image);
@@ -419,7 +425,7 @@ export default function Home() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover transition duration-300 ease-in-out hover:opacity-90"
                       loading="lazy"
-                      quality={80}
+                      quality={70}
                       onError={(e) => {
                         console.error('Food image failed to load:', e.target.src);
                         console.error('Food image path:', item.image);

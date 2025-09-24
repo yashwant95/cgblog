@@ -14,7 +14,7 @@ export default function OptimizedImage({
   sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   fill = false,
   loading = 'lazy',
-  quality = 80,
+  quality = 70, // Reduced for better compression
   placeholder = 'blur',
   blurDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwIoJObjmwAAAABJRU5ErkJggg==',
 }) {

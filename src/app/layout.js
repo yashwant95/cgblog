@@ -277,7 +277,7 @@ export default function RootLayout({ children }) {
         {/* Google Analytics - Optimized Loading */}
         <Script
           id="google-analytics-config"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -287,13 +287,14 @@ export default function RootLayout({ children }) {
                 page_path: window.location.pathname,
                 anonymize_ip: true,
                 cookie_flags: 'SameSite=None;Secure',
-                send_page_view: false
+                send_page_view: false,
+                transport_type: 'beacon'
               });
             `
           }}
         />
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=G-278L9G22EN`}
         />
         
