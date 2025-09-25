@@ -65,12 +65,12 @@ export default function ReviewsListClient() {
       await fetchReviews();
     };
     initializeData();
-  }, []);
+  }, [fetchReviews]);
 
   // Fetch reviews when filters change
   useEffect(() => {
     fetchReviews();
-  }, [searchTerm, filterRating, filterCategory]);
+  }, [fetchReviews, searchTerm, filterRating, filterCategory]);
 
   const createSlug = (title) => {
     return title

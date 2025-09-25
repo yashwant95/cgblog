@@ -44,6 +44,9 @@ const nextConfig = {
       // Tree shaking for better bundle size
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
+      
+      // Target modern browsers to reduce polyfills
+      config.target = ['web', 'es2017'];
     }
     return config;
   },
@@ -69,6 +72,24 @@ const nextConfig = {
       },
       {
         source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/optimized/(.*)',
         headers: [
           {
             key: 'Cache-Control',

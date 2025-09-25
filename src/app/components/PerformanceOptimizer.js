@@ -10,10 +10,9 @@ export default function PerformanceOptimizer() {
     
     // Preload critical resources
     const preloadCriticalResources = () => {
-      // Preload critical images
+      // Preload critical images - only hero image for LCP
       const criticalImages = [
-        '/hero-bg.png',
-        '/cg-map.png'
+        '/optimized/hero-bg.avif'
       ];
       
       criticalImages.forEach(src => {
@@ -25,21 +24,11 @@ export default function PerformanceOptimizer() {
       });
     };
 
-    // Preload critical API endpoints
+    // Preload critical API endpoints - disabled as APIs don't exist
     const preloadCriticalAPIs = () => {
-      const criticalAPIs = [
-        '/api/places?featured=true&limit=3',
-        '/api/reviews?featured=true&limit=3',
-        '/api/events?upcoming=true&limit=3',
-        '/api/food?featured=true&limit=3'
-      ];
-      
-      criticalAPIs.forEach(url => {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = url;
-        document.head.appendChild(link);
-      });
+      // APIs are not implemented yet, so we skip preloading them
+      // This prevents 404 errors in the console
+      console.log('API preloading skipped - endpoints not implemented');
     };
 
     // Optimize third-party scripts loading
@@ -65,7 +54,7 @@ export default function PerformanceOptimizer() {
       // Remove any dynamically added preload links
       const preloadLinks = document.querySelectorAll('link[rel="preload"]');
       preloadLinks.forEach(link => {
-        if (link.href.includes('/hero-bg.png') || link.href.includes('/cg-map.png')) {
+        if (link.href.includes('/optimized/hero-bg.avif') || link.href.includes('/optimized/cg-map.webp')) {
           link.remove();
         }
       });

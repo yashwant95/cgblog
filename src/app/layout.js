@@ -6,6 +6,10 @@ import NavBar from "./NavBar";
 import ScrollToTop from "./ScrollToTop";
 import PerformanceOptimizer from "./components/PerformanceOptimizer";
 import PerformanceMonitor from "./components/PerformanceMonitor";
+import BundleOptimizer from "./components/BundleOptimizer";
+import AdSenseInitializer from "./components/AdSenseInitializer";
+import CSSPreloader from "./components/CSSPreloader";
+import BFCacheOptimizer from "./components/BFCacheOptimizer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -175,10 +179,17 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="//maps.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//backend.cgblog.in" />
+        <link rel="dns-prefetch" href="//pagead2.googlesyndication.com" />
+        
+        {/* Preconnect to critical third parties */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         
         {/* Preload critical images */}
         <link rel="preload" as="image" href="/optimized/hero-bg.avif" />
-        <link rel="preload" as="image" href="/optimized/cg-map.webp" />
+        
+        {/* Preload critical CSS - removed onLoad to prevent error */}
+        
+        {/* Preload critical fonts - removed invalid paths */}
         
         {/* Preload critical CSS - removed as it's causing 404 */}
         
@@ -297,6 +308,14 @@ export default function RootLayout({ children }) {
           strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=G-278L9G22EN`}
         />
+
+        {/* Google AdSense - Ultra Optimized */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1299840457351289"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         
         {/* Canonical and Alternate Links */}
         <link rel="canonical" href="https://cgblog.in" />
@@ -324,11 +343,15 @@ export default function RootLayout({ children }) {
         
         <PerformanceOptimizer />
         <PerformanceMonitor />
+        <BundleOptimizer />
+        <AdSenseInitializer />
+        <CSSPreloader />
+        <BFCacheOptimizer />
         <NavBar />
         <main className="min-h-[calc(100vh-64px)]">
           {children}
         </main>
-        <footer className="bg-gray-100 py-6">
+        <footer className="bg-gray-100 py-6" style={{ minHeight: '200px', contain: 'layout' }}>
           <div className="w-full px-4 md:px-8 lg:px-16 text-center text-gray-600">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6 text-left">
               <div>

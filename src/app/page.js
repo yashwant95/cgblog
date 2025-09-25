@@ -142,21 +142,15 @@ export default function Home() {
         className="h-screen flex items-center justify-center bg-cover bg-center relative hero-bg bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
         style={{ 
           backgroundImage: `url('/optimized/hero-bg.avif')`,
-          backgroundImage: `
-            image-set(
-              url('/optimized/hero-bg.avif') type('image/avif'),
-              url('/optimized/hero-bg.webp') type('image/webp'),
-              url('/hero-bg.png') type('image/png')
-            )
-          `,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          willChange: 'transform'
         }}
       >
         <div className="absolute inset-0 bg-black opacity-40"></div>
         <div className="w-full px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">Chhattisgarh Explorer</h1>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg" style={{ contain: 'layout' }}>Chhattisgarh Explorer</h1>
           <p className="text-xl md:text-2xl text-white mb-8 drop-shadow-md">Your guide to the best places, food, events & authentic reviews</p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <Link href="/places" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105 hover:shadow-lg">Explore Places</Link>

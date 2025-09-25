@@ -108,12 +108,12 @@ export default function FoodListClient() {
       await fetchFoods();
     };
     initializeData();
-  }, []);
+  }, [fetchFoods]);
 
   // Fetch foods when filters change
   useEffect(() => {
     fetchFoods();
-  }, [searchTerm, selectedCategory, selectedCuisine, selectedDifficulty, isVegetarian]);
+  }, [fetchFoods, searchTerm, selectedCategory, selectedCuisine, selectedDifficulty, isVegetarian]);
 
   const clearFilters = () => {
     setSearchTerm('');
