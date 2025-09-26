@@ -10,6 +10,7 @@ import BundleOptimizer from "./components/BundleOptimizer";
 import AdSenseInitializer from "./components/AdSenseInitializer";
 import CSSPreloader from "./components/CSSPreloader";
 import BFCacheOptimizer from "./components/BFCacheOptimizer";
+import AdBlockerManager from "./components/AdBlockerManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -341,6 +342,9 @@ export default function RootLayout({ children }) {
         </noscript>
         {/* End Google Tag Manager (noscript) */}
         
+        {/* Ad Blocker Detection */}
+        <AdBlockerManager />
+        
         <PerformanceOptimizer />
         <PerformanceMonitor />
         <BundleOptimizer />
@@ -366,19 +370,19 @@ export default function RootLayout({ children }) {
               <div>
                 <h3 className="font-semibold text-gray-800 mb-4">Information</h3>
                 <ul className="space-y-2">
-                  <li><Link href="/about/" className="hover:text-blue-600">About Us</Link></li>
-                  <li><Link href="/contact/" className="hover:text-blue-600">Contact</Link></li>
-                  <li><Link href="/privacy-policy/" className="hover:text-blue-600">Privacy Policy</Link></li>
-                  <li><Link href="/terms/" className="hover:text-blue-600">Terms of Use</Link></li>
+                  <li><Link href="/about/" className="hover:text-blue-600" prefetch={false}>About Us</Link></li>
+                  <li><Link href="/contact/" className="hover:text-blue-600" prefetch={false}>Contact</Link></li>
+                  <li><Link href="/privacy-policy/" className="hover:text-blue-600" prefetch={false}>Privacy Policy</Link></li>
+                  <li><Link href="/terms/" className="hover:text-blue-600" prefetch={false}>Terms of Use</Link></li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800 mb-4">Resources</h3>
                 <ul className="space-y-2">
-                  <li><Link href="/travel-tips/" className="hover:text-blue-600">Travel Tips</Link></li>
-                  <li><Link href="/maps/" className="hover:text-blue-600">Maps</Link></li>
-                  <li><Link href="/gallery/" className="hover:text-blue-600">Photo Gallery</Link></li>
-                  <li><Link href="/faq/" className="hover:text-blue-600">FAQs</Link></li>
+                  <li><Link href="/travel-tips/" className="hover:text-blue-600" prefetch={false}>Travel Tips</Link></li>
+                  <li><Link href="/maps/" className="hover:text-blue-600" prefetch={false}>Maps</Link></li>
+                  <li><Link href="/gallery/" className="hover:text-blue-600" prefetch={false}>Photo Gallery</Link></li>
+                  <li><Link href="/faq/" className="hover:text-blue-600" prefetch={false}>FAQs</Link></li>
                 </ul>
               </div>
               <div>

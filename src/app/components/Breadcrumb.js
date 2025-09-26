@@ -8,8 +8,10 @@ import { useEffect, useState } from 'react';
 export default function Breadcrumbs() {
   const pathname = usePathname();
   const [breadcrumbs, setBreadcrumbs] = useState([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const linkPath = pathname.split('/');
     linkPath.shift();
 
@@ -26,6 +28,21 @@ export default function Breadcrumbs() {
   // Skip rendering breadcrumbs on homepage
   if (pathname === '/') {
     return null;
+  }
+
+  // Prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <nav aria-label="Breadcrumb" className="bg-gray-100 py-2 px-4 md:px-6">
+        <ol className="flex flex-wrap items-center text-sm md:text-base">
+          <li className="flex items-center">
+            <Link href="/" className="text-blue-600 hover:text-blue-800">
+              Home
+            </Link>
+          </li>
+        </ol>
+      </nav>
+    );
   }
 
   // Generate structured data for breadcrumbs

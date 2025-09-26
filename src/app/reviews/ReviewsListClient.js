@@ -16,7 +16,7 @@ export default function ReviewsListClient() {
   const [filterCategory, setFilterCategory] = useState('');
   const [categories, setCategories] = useState([]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const params = {
@@ -46,9 +46,9 @@ export default function ReviewsListClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filterRating, filterCategory]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await ReviewsApi.getReviewCategories();
       // Handle the API response structure
@@ -56,7 +56,7 @@ export default function ReviewsListClient() {
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
-  };
+  }, []);
 
   // Fetch reviews on component mount
   useEffect(() => {
@@ -65,12 +65,12 @@ export default function ReviewsListClient() {
       await fetchReviews();
     };
     initializeData();
-  }, [fetchReviews]);
+  }, [fetchCategories]);
 
   // Fetch reviews when filters change
   useEffect(() => {
     fetchReviews();
-  }, [fetchReviews, searchTerm, filterRating, filterCategory]);
+  }, [searchTerm, filterRating, filterCategory]);
 
   const createSlug = (title) => {
     return title

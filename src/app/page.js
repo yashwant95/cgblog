@@ -90,12 +90,61 @@ export default function Home() {
       try {
         setLoading(true);
         
-        // Fetch all data in parallel
-        const [placesData, reviewsData, eventsData, foodData] = await Promise.all([
+        // Use a safer approach to call FoodApi method
+        let foodData = [];
+        try {
+          if (FoodApi && typeof FoodApi.getFeaturedFoods === 'function') {
+            foodData = await FoodApi.getFeaturedFoods(3);
+          } else {
+            console.warn('FoodApi.getFeaturedFoods is not available, using fallback');
+            // Use fallback data directly
+            foodData = {
+              success: true,
+              data: [
+                {
+                  _id: '1',
+                  name: 'Chila',
+                  description: 'Traditional Chhattisgarhi breakfast made with rice flour',
+                  shortDescription: 'Traditional rice flour breakfast',
+                  image: '/optimized/food-chila.avif',
+                  category: 'breakfast',
+                  featured: true,
+                  rating: 4.5
+                },
+                {
+                  _id: '2',
+                  name: 'Faraa',
+                  description: 'Steamed rice dumplings filled with dal',
+                  shortDescription: 'Steamed rice dumplings with dal filling',
+                  image: '/optimized/food-faraa.avif',
+                  category: 'snacks',
+                  featured: true,
+                  rating: 4.3
+                },
+                {
+                  _id: '3',
+                  name: 'Muthia',
+                  description: 'Traditional Chhattisgarhi steamed flour balls',
+                  shortDescription: 'Steamed flour balls with chutney',
+                  image: '/optimized/food-muthia.avif',
+                  category: 'snacks',
+                  featured: true,
+                  rating: 4.2
+                }
+              ]
+            };
+          }
+        } catch (foodError) {
+          console.error('FoodApi error:', foodError);
+          // Use fallback data
+          foodData = { data: [] };
+        }
+        
+        // Fetch other data in parallel
+        const [placesData, reviewsData, eventsData] = await Promise.all([
           PlacesApi.getAllPlaces(),
           ReviewsApi.getAllReviews({ featured: true, limit: 3 }),
-          EventsApi.getUpcomingEvents(3),
-          FoodApi.getFeaturedFoods(3)
+          EventsApi.getUpcomingEvents(3)
         ]);
 
         setPlaces(placesData);

@@ -37,11 +37,11 @@ export default function NavBar() {
         </Link>
         {/* Desktop navigation links */}
         <div className="hidden md:flex gap-8 mx-auto">
-          <Link href="/" className="font-semibold text-green-700 hover:underline">Home</Link>
-          <Link href="/food" className="font-semibold text-green-700 hover:underline">Food Blog</Link>
-          <Link href="/places" className="font-semibold text-green-700 hover:underline">Places Blog</Link>
-          <Link href="/reviews" className="font-semibold text-green-700 hover:underline">Reviews</Link>
-          <Link href="/events" className="font-semibold text-green-700 hover:underline">Events</Link>
+          <Link href="/" className="font-semibold text-green-700 hover:underline" prefetch={false}>Home</Link>
+          <Link href="/food" className="font-semibold text-green-700 hover:underline" prefetch={false}>Food Blog</Link>
+          <Link href="/places" className="font-semibold text-green-700 hover:underline" prefetch={false}>Places Blog</Link>
+          <Link href="/reviews" className="font-semibold text-green-700 hover:underline" prefetch={false}>Reviews</Link>
+          <Link href="/events" className="font-semibold text-green-700 hover:underline" prefetch={false}>Events</Link>
         </div>
         {/* Mobile menu icon (hamburger/close) */}
         <button
@@ -77,11 +77,11 @@ export default function NavBar() {
         <div 
           className={`md:hidden absolute top-full right-0 mt-2 w-64 bg-white shadow-xl rounded-lg py-2 z-50 flex flex-col border border-gray-200 overflow-hidden transition-all duration-300 ${mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}
         >
-          <Link href="/" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-          <Link href="/food" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>Food Blog</Link>
-          <Link href="/places" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>Places Blog</Link>
-          <Link href="/reviews" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>Reviews</Link>
-          <Link href="/events" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>Events</Link>
+          <Link href="/" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)} prefetch={false}>Home</Link>
+          <Link href="/food" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)} prefetch={false}>Food Blog</Link>
+          <Link href="/places" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)} prefetch={false}>Places Blog</Link>
+          <Link href="/reviews" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)} prefetch={false}>Reviews</Link>
+          <Link href="/events" className="px-6 py-3 text-green-700 font-semibold hover:bg-green-50 border-l-4 border-transparent hover:border-green-500 transition-all duration-200" onClick={() => setMobileMenuOpen(false)} prefetch={false}>Events</Link>
         </div>
       </div>
     </nav>
