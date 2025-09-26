@@ -15,13 +15,17 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Navigation items with descriptions
-  const navItems = [
+  // Primary navigation categories
+  const primaryNavItems = [
     { 
       name: "Home", 
       href: "/", 
       description: "Discover Chhattisgarh" 
     },
+  ];
+
+  // Main content categories
+  const contentNavItems = [
     { 
       name: "Places", 
       href: "/places", 
@@ -42,20 +46,24 @@ export default function NavBar() {
       href: "/reviews", 
       description: "Travel experiences" 
     },
+  ];
+
+  // Media and resources
+  const resourceNavItems = [
     { 
       name: "Gallery", 
       href: "/gallery", 
       description: "Photo collection" 
     },
+    { name: "Travel Tips", href: "/travel-tips", description: "Helpful guides" },
+    { name: "Maps", href: "/maps", description: "Navigation help" },
   ];
 
-  // Secondary navigation items
-  const secondaryNavItems = [
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-    { name: "Travel Tips", href: "/travel-tips" },
-    { name: "Maps", href: "/maps" },
-    { name: "FAQ", href: "/faq" },
+  // Information pages
+  const infoNavItems = [
+    { name: "About", href: "/about", description: "Learn about us" },
+    { name: "Contact", href: "/contact", description: "Get in touch" },
+    { name: "FAQ", href: "/faq", description: "Common questions" },
   ];
 
   // Mock search data - replace with actual search implementation
@@ -120,8 +128,9 @@ export default function NavBar() {
 
   // Get current page info
   const getCurrentPageInfo = () => {
-    const currentItem = navItems.find(item => item.href === pathname);
-    return currentItem || { name: "Page", icon: "📄" };
+    const allNavItems = [...primaryNavItems, ...contentNavItems, ...resourceNavItems, ...infoNavItems];
+    const currentItem = allNavItems.find(item => item.href === pathname);
+    return currentItem || { name: "Page" };
   };
 
   const handleSearch = (e) => {
@@ -169,27 +178,96 @@ export default function NavBar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-green-100 hover:text-green-800 group ${
-                  pathname === item.href 
-                    ? 'bg-green-100 text-green-800 shadow-sm' 
-                    : 'text-gray-700 hover:shadow-sm'
-                }`}
-                prefetch={false}
-              >
-                <span className="group-hover:scale-105 transition-transform duration-200">
-                  {item.name}
-                </span>
-              </Link>
-            ))}
+          <div className="hidden lg:flex items-center flex-1 justify-center">
+            <div className="flex items-center space-x-6">
+              
+              {/* Primary Navigation */}
+              <div className="flex items-center space-x-1">
+                {primaryNavItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-green-100 hover:text-green-800 group ${
+                      pathname === item.href 
+                        ? 'bg-green-100 text-green-800 shadow-sm' 
+                        : 'text-gray-700 hover:shadow-sm'
+                    }`}
+                    prefetch={false}
+                  >
+                    <span className="group-hover:scale-105 transition-transform duration-200">
+                      {item.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Content Categories */}
+              <div className="flex items-center space-x-1">
+                {contentNavItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-blue-100 hover:text-blue-800 group ${
+                      pathname === item.href 
+                        ? 'bg-blue-100 text-blue-800 shadow-sm' 
+                        : 'text-gray-700 hover:shadow-sm'
+                    }`}
+                    prefetch={false}
+                  >
+                    <span className="group-hover:scale-105 transition-transform duration-200">
+                      {item.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Resources Dropdown */}
+              <div className="relative group">
+                <button className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-800 transition-all duration-200">
+                  <span className="group-hover:scale-105 transition-transform duration-200">More</span>
+                  <svg className="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 min-w-48">
+                  <div className="p-2">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-2 py-1">Resources</div>
+                    {resourceNavItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                        prefetch={false}
+                      >
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-xs text-gray-500">{item.description}</div>
+                      </Link>
+                    ))}
+                    
+                    <div className="border-t border-gray-100 mt-2 pt-2">
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-2 py-1">Information</div>
+                      {infoNavItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                          prefetch={false}
+                        >
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-xs text-gray-500">{item.description}</div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Search and Actions */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* Search (Right Side) */}
+          <div className="hidden md:flex items-center">
             
             {/* Search */}
             <div className="relative" ref={searchRef}>
@@ -270,26 +348,6 @@ export default function NavBar() {
                 </div>
               )}
             </div>
-
-            {/* Quick Actions */}
-            <div className="flex items-center space-x-1">
-              {secondaryNavItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-green-100 hover:text-green-800 group ${
-                    pathname === item.href 
-                      ? 'bg-green-100 text-green-800 shadow-sm' 
-                      : 'text-gray-600 hover:shadow-sm'
-                  }`}
-                  prefetch={false}
-                >
-                  <span className="group-hover:scale-105 transition-transform duration-200">
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -352,7 +410,9 @@ export default function NavBar() {
             </form>
 
             {/* Mobile Navigation Items */}
-            {navItems.map((item) => (
+            
+            {/* Primary Navigation */}
+            {primaryNavItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
@@ -370,20 +430,70 @@ export default function NavBar() {
               </Link>
             ))}
 
-            {/* Mobile Secondary Items */}
-            <div className="border-t border-gray-100 pt-2 mt-2">
-              <div className="grid grid-cols-2 gap-2">
-                {secondaryNavItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                    prefetch={false}
-                  >
-                    <span className="text-sm">{item.name}</span>
-                  </Link>
-                ))}
-              </div>
+            {/* Content Categories */}
+            <div className="border-t border-gray-100 pt-3 mt-3">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-1 mb-2">Explore</div>
+              {contentNavItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 rounded-lg transition-colors duration-150 ${
+                    pathname === item.href 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  prefetch={false}
+                >
+                  <div>
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-xs text-gray-500">{item.description}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Resources */}
+            <div className="border-t border-gray-100 pt-3 mt-3">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-1 mb-2">Resources</div>
+              {resourceNavItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 rounded-lg transition-colors duration-150 ${
+                    pathname === item.href 
+                      ? 'bg-purple-100 text-purple-800' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  prefetch={false}
+                >
+                  <div>
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-xs text-gray-500">{item.description}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Information */}
+            <div className="border-t border-gray-100 pt-3 mt-3">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-1 mb-2">Information</div>
+              {infoNavItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 rounded-lg transition-colors duration-150 ${
+                    pathname === item.href 
+                      ? 'bg-gray-100 text-gray-800' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  prefetch={false}
+                >
+                  <div>
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-xs text-gray-500">{item.description}</div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>

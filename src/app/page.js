@@ -14,7 +14,6 @@ import config from './config';
 
 // Lazy load non-critical components
 const NewsletterSection = lazy(() => import('./NewsletterSection'));
-const FaqSection = lazy(() => import('./components/FaqSection'));
 const OptimizedImage = lazy(() => import('./components/OptimizedImage'));
 
 // Function to create URL-friendly slug from place name
@@ -601,12 +600,130 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* FAQ Section - Full width */}
-      <div className="w-full">
-        <Suspense fallback={<div className="text-center py-12"><div className="loading-spinner"></div><p className="mt-4 text-gray-600">Loading FAQ...</p></div>}>
-          <FaqSection />
-        </Suspense>
-      </div>
+      {/* FAQ Section - Inline */}
+      <motion.section 
+        className="w-full bg-gradient-to-br from-green-50 via-blue-50 to-yellow-50 py-16"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Frequently Asked <span className="text-green-600">Questions</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Get quick answers to common questions about traveling to Chhattisgarh
+            </p>
+          </motion.div>
+
+          {/* FAQ Content */}
+          <div className="space-y-6">
+            {/* General Travel Information */}
+            <motion.div 
+              className="bg-white rounded-lg shadow-lg overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <div className="bg-green-100 px-6 py-4 border-b border-green-200">
+                <h3 className="text-xl font-bold text-gray-900">General Travel Information</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">What is the best time to visit Chhattisgarh?</h4>
+                    <p className="text-gray-700">The best time to visit Chhattisgarh is during the winter months from October to March when the weather is pleasant and ideal for sightseeing.</p>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">How do I reach Chhattisgarh?</h4>
+                    <p className="text-gray-700">Chhattisgarh is well-connected by air, rail, and road. The main airport is Swami Vivekananda Airport in Raipur with regular flights from major Indian cities.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Tourist Attractions */}
+            <motion.div 
+              className="bg-white rounded-lg shadow-lg overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="bg-blue-100 px-6 py-4 border-b border-blue-200">
+                <h3 className="text-xl font-bold text-gray-900">Tourist Attractions</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">What are the must-visit places in Chhattisgarh?</h4>
+                    <p className="text-gray-700">Must-visit places include Chitrakote Falls (Niagara of India), Bhoramdeo Temple, Sirpur archaeological site, Kanger Valley National Park, and various wildlife sanctuaries.</p>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">What wildlife can I see in Chhattisgarh?</h4>
+                    <p className="text-gray-700">Chhattisgarh is home to tigers, leopards, sloth bears, wild elephants, bison, deer, and numerous bird species in its national parks and wildlife sanctuaries.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Culture and Food */}
+            <motion.div 
+              className="bg-white rounded-lg shadow-lg overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <div className="bg-purple-100 px-6 py-4 border-b border-purple-200">
+                <h3 className="text-xl font-bold text-gray-900">Culture & Food</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">What is special about Bastar Dussehra?</h4>
+                    <p className="text-gray-700">Bastar Dussehra is unique as it's a 75-day long festival dedicated to the local deity Danteshwari Mata, featuring tribal rituals and traditional dances.</p>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">What is the local cuisine like?</h4>
+                    <p className="text-gray-700">Chhattisgarhi cuisine includes Chila (rice pancake), Farra (steamed rice dumplings), Bafauri (steamed gram flour balls), and various flavorful rice-based preparations.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Call to Action for More FAQs */}
+            <motion.div 
+              className="text-center mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <p className="text-gray-600 mb-4">Need more detailed information?</p>
+              <Link 
+                href="/faq"
+                className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                View Complete FAQ Guide
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
 
       {/* Newsletter Section - Full width */}
       <div className="w-full">
@@ -614,8 +731,6 @@ export default function Home() {
           <NewsletterSection />
         </Suspense>
       </div>
-      
-      {/* Add FAQ Section */}
    
       
       {/* Enhanced Footer */}
