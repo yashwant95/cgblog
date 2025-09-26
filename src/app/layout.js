@@ -352,7 +352,7 @@ export default function RootLayout({ children }) {
         <CSSPreloader />
         <BFCacheOptimizer />
         <NavBar />
-        <main className="min-h-[calc(100vh-64px)]">
+        <main className="mt-16 md:mt-24 min-h-[calc(100vh-96px)]">
           {children}
         </main>
         <footer className="bg-gray-100 py-6" style={{ minHeight: '200px', contain: 'layout' }}>
