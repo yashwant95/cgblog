@@ -3,6 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReviewsApi from '../../coreApi/ReviewsApi';
 import config from '../../config';
+import { reviewPosts } from '../../data/reviewsData';
+
+// Generate static params for build optimization
+export async function generateStaticParams() {
+  return reviewPosts.map((review) => ({
+    slug: review.slug,
+  }));
+}
 
 // Generate metadata dynamically based on the review
 export async function generateMetadata({ params }) {

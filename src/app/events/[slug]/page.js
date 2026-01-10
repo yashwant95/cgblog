@@ -3,6 +3,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+// Generate static params for build optimization
+export async function generateStaticParams() {
+  return eventsPosts.map((event) => ({
+    slug: event.slug,
+  }));
+}
+
 // Generate metadata dynamically based on the event
 export async function generateMetadata({ params }) {
   const event = eventsPosts.find(p => p.slug === params.slug);

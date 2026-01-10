@@ -1,9 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 🔥 REQUIRED: generate /out folder
+  output: 'export',
+
+  // ✅ Ignore ESLint during production build
   eslint: {
     ignoreDuringBuilds: true,
   },
+
+  // 🖼️ Image config (required fix for static export)
   images: {
+    unoptimized: true, // ❗ REQUIRED for static export
+
     remotePatterns: [
       {
         protocol: 'https',
@@ -22,85 +30,37 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 31536000, // 1 year
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
   },
+
+  // ⚡ Performance optimizations
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['framer-motion', 'antd'],
     webVitalsAttribution: ['CLS', 'LCP'],
   },
+
+  // 🧹 Remove console logs in production
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
-  // SWC minification is enabled by default in Next.js 15+
-  // Optimize bundle
+
+  // 📦 Webpack optimization
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
-      // Tree shaking for better bundle size
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
-      
-      // Target modern browsers to reduce polyfills
       config.target = ['web', 'es2017'];
     }
     return config;
-  },
-  // Headers for better caching
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
-      },
-      {
-        source: '/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/optimized/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
   },
 };
 

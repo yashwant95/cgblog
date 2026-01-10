@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import config from '../../config';
+import { placePosts } from '../../data/placesData';
 
 // API URL for places
 const API_URL = config.ENDPOINTS.PLACES;
@@ -59,9 +60,16 @@ async function fetchPlaceBySlug(slug) {
   return places.find(p => p.slug === slug);
 }
 
+// Generate static params for build optimization
+export async function generateStaticParams() {
+  return placePosts.map((place) => ({
+    slug: place.slug,
+  }));
+}
+
 // Generate metadata dynamically based on the place
 export async function generateMetadata({ params }) {
-  const place = await fetchPlaceBySlug(params.slug);
+  const place = placePosts.find(p => p.slug === params.slug);
 
   if (!place) {
     return {
@@ -90,9 +98,9 @@ export async function generateMetadata({ params }) {
 }
 
 // Define the page component
-export default async function PlaceDetailPage({ params }) {
+export default function PlaceDetailPage({ params }) {
   const { slug } = params;
-  const place = await fetchPlaceBySlug(slug);
+  const place = placePosts.find(p => p.slug === slug);
 
   // If place is not found, show a 404 page
   if (!place) {
@@ -113,32 +121,6 @@ export default async function PlaceDetailPage({ params }) {
     "name": place.title,
     "description": place.excerpt,
     "image": place.image,
-    "address": {
-      "@type": "PostalAddress",
-      "name": place.location // Assuming location field can be used as address name
-      // Add more address properties if available (e.g., streetAddress, addressLocality, addressRegion)
-    },
-    "geo": {
-        "@type": "GeoCoordinates",
-        // Replace with actual latitude and longitude if available in place object
-        "latitude": 0,
-        "longitude": 0
-    },
-    "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ],
-        "opens": place.visitingHours.split(' to ')[0].split(' ')[0], // Extract opening time
-        "closes": place.visitingHours.split(' to ')[1].split(' ')[0]  // Extract closing time
-    }
-    // Add more properties like aggregateRating, review if available
   };
 
 
