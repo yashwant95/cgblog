@@ -1,7 +1,7 @@
 import config from '../config';
 
 class FoodApi {
-  static baseUrl = 'https://backend.cgblog.in/api/food'; // Use only this API URL
+  static baseUrl = 'https://cg-blog-backend.vercel.app/api/food'; // Use only this API URL
   static requestCache = new Map();
   static cacheTime = 5 * 60 * 1000; // 5 minutes
 
